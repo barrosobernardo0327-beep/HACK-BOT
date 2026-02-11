@@ -1,0 +1,7 @@
+{
+  "name": "Angola Cultural ",
+  "description": "An interactive educational platform celebrating Angolan culture through quizzes, a travel simulator, memory games, and an AI learning assistant with pronunciation guides.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
