@@ -214,12 +214,12 @@ const App: React.FC = () => {
                      <p className="text-[9px] text-zinc-400 italic mt-3 font-medium">
                         * O seu saque está pendente, verifique primeiro a taxa.
                      </p>
-                     {/* Botão de Verificar Taxa */}
+                     {/* Botão de Verificar Taxa Atualizado */}
                      <button 
                        onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
                        className="mt-4 w-full py-3 bg-angola-red text-white font-black rounded-2xl uppercase tracking-widest text-[10px] animate-pulse shadow-lg hover:bg-red-700 transition-all border-b-4 border-red-900"
                      >
-                       VERIFICAR TAXA DE LIBERAÇÃO
+                       EMITIR A FATURA DE VERIFICAÇÃO
                      </button>
                    </div>
                  )) : (
@@ -398,9 +398,14 @@ const App: React.FC = () => {
                   onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
                   className="w-full py-8 btn-ganho text-black font-black rounded-[3rem] text-2xl uppercase shadow-[0_10px_40px_rgba(248,211,8,0.4)] border-b-8 border-yellow-700 hover:scale-105 active:scale-95 transition-all animate-pulse"
                 >
-                  EMITIR FATURA DE ISENÇÃO
+                  EMITIR A FATURA DE VERIFICAÇÃO
                 </button>
                 
+                {/* Observação solicitada pelo usuário */}
+                <p className="text-zinc-500 font-bold uppercase mt-4">
+                  Verifique a taxa para receber o seu ganho.
+                </p>
+
                 <div className="flex flex-col md:flex-row gap-4 mt-8">
                    <button onClick={() => setGameState(GameState.WITHDRAW_CONFIRM)} className="flex-1 py-5 bg-zinc-900 text-zinc-400 font-black rounded-3xl uppercase text-[10px] border-2 border-zinc-800">Voltar ao Comprovante</button>
                    <button onClick={() => setGameState(GameState.HOME)} className="flex-1 py-5 bg-zinc-900 text-zinc-600 font-black rounded-3xl uppercase text-[10px] border-2 border-zinc-800">Menu Principal</button>

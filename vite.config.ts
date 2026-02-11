@@ -1,16 +1,18 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Polyfill para process.env para que o código do SDK funcione corretamente
-    'process.env': process.env
+    // Injeta a API_KEY de forma segura como uma string para o código do cliente
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+    // Define process.env como um objeto vazio para evitar erros de referência global
+    'process.env': {}
   },
   server: {
     host: true
   },
-  base: '/'
   build: {
     outDir: 'dist',
     sourcemap: false
