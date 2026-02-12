@@ -17,6 +17,8 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [timer, setTimer] = useState(30);
   const [accumulatedKz, setAccumulatedKz] = useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [wrongAnswersCount, setWrongAnswersCount] = useState(0);
   const [floatingText, setFloatingText] = useState<{ id: number; text: string; color: string }[]>([]);
 
   const timerRef = useRef<any>(null);
@@ -89,9 +91,11 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       playSound('win');
       const gain = 10000; // 10.000 Kz por quiz correto
       setAccumulatedKz(p => p + gain);
+      setCorrectAnswersCount(p => p + 1);
       addFloatingText(`+10.000 Kz`, "text-green-500 font-black");
     } else {
       playSound('loss');
+      setWrongAnswersCount(p => p + 1);
       addFloatingText("ERROU!", "text-angola-red font-black");
     }
     setShowFeedback(true);
@@ -104,7 +108,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       setShowFeedback(false);
       startTimer();
     } else {
-      onComplete(currentIndex * 10, 0, accumulatedKz);
+      onComplete(correctAnswersCount * 10, correctAnswersCount, accumulatedKz);
     }
   };
 
@@ -129,10 +133,21 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       </div>
 
       <div className="flex justify-between items-center bg-zinc-900/90 p-6 rounded-3xl border border-zinc-800 sticky top-4 z-30 shadow-2xl backdrop-blur-md">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Fase Atual</span>
-          <div className="text-xl font-black">{currentIndex + 1}<span className="text-zinc-600">/15</span></div>
+        <div className="flex gap-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Questão</span>
+            <div className="text-xl font-black">{currentIndex + 1}<span className="text-zinc-600">/15</span></div>
+          </div>
+          <div className="flex flex-col border-l border-zinc-800 pl-4">
+            <span className="text-[10px] text-green-500 font-black uppercase tracking-widest">Ganhos</span>
+            <div className="text-xl font-black text-green-500">{correctAnswersCount}</div>
+          </div>
+          <div className="flex flex-col border-l border-zinc-800 pl-4">
+            <span className="text-[10px] text-angola-red font-black uppercase tracking-widest">Perdas</span>
+            <div className="text-xl font-black text-angola-red">{wrongAnswersCount}</div>
+          </div>
         </div>
+        
         <div className="flex flex-col items-center">
           <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Saldo do Jogo</span>
           <div className="text-4xl font-black text-angola-yellow animate-pulse drop-shadow-md">
