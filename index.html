@@ -7,6 +7,19 @@
     <title>SOU ANGOLANO - Conhecimento vale Ouro</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'angola-red': '#E31B23',
+              'angola-yellow': '#F8D308',
+              'angola-black': '#000000',
+            }
+          }
+        }
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
@@ -33,6 +46,29 @@
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .animate-zoom-in {
+            animation: zoomIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1) translate(0px, 0px); opacity: 0.15; }
+            50% { transform: scale(1.1) translate(15px, -15px); opacity: 0.25; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 10s ease-in-out infinite;
+        }
+
+        .text-glow-yellow {
+            text-shadow: 0 0 25px rgba(248, 211, 8, 0.75), 0 0 45px rgba(248, 211, 8, 0.45);
+        }
+        .text-glow-red {
+            text-shadow: 0 0 25px rgba(227, 27, 35, 0.75), 0 0 45px rgba(227, 27, 35, 0.45);
         }
 
         .gold-glow {

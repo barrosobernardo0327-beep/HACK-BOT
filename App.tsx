@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Quiz } from './components/Quiz';
 import { GameState, UserStats, WithdrawMethod, Transaction } from './types';
+import heroImage from './src/assets/images/sou_angolano_hero_1779623430505.png';
 
 const BANCOS_ANGOLA = [
   { id: 'BAI', name: 'BAI - Banco Angolano de Investimentos', code: '94' },
@@ -20,8 +21,125 @@ const GANHADORES_EXEMPLO = [
   "José Malanje", "Sérgio Namibe", "Katia Huambo"
 ];
 
+const MOCK_CHAT_USERS = [
+  "Yuri Manuel", "Jandira Santos", "Ndalu de Castro", "Bernardo Kz", "Kianda F.", 
+  "Domingos António", "Josefa de Sousa", "Mateus Pedro", "Sofia Benguela", "Pedro K.", 
+  "Moisés", "Adilson Capolo", "Matias Ngola", "Clélia Ndala", "Zola Fernandes", 
+  "Mauro Nzaji", "Kianda Manuel", "Kiesse Santos", "Yara de Gouveia", "Nzinga Costa", 
+  "Salo Caxito", "Gelson Lobito", "Tuanaza Neto", "Benvinda Cruz", "Heitor Kassanje", 
+  "Valter Semedo", "Janete Cruz", "António B.", "Isabel L.", "Catarina Ndalatando", 
+  "Marcos Viana", "Filipe Cabinda", "Nara de Sousa", "Simão Malanje", "Duarte Namibe"
+];
+
+const MOCK_SINGLE_COMMENTS = [
+  "Acabei de pagar os 5.000 Kz e os 150.000 Kz caíram directo na minha conta! Chocadooo!",
+  "Muito bom o vídeo explicativo, agora percebi o processo de libertação no BNA.",
+  "Isto é sério! Glória ao criador desta plataforma, cultura nacional valorizada!",
+  "Estou a assistir e a ver o saldo a ser libertado! Brutal!",
+  "O vídeo explica exactamente a lei 12/23 sobre isenção de impostos. Muito bem pensado.",
+  "Melhor jogo de Angola de longe! Já faturei 200.000 Kz",
+  "Já paguei e já recebi o sms do multicaixa express 🤑🤑",
+  "Obrigada Sou Angolano! Comprei saldo de dados para a família toda agora",
+  "Basta seguir as instruções, a Kintu é o nosso portal oficial de faturação.",
+  "Estava com receio, mas a verificação é mesmo obrigatória por lei.",
+  "Super rápido! Valeu a pena passar o tempo a aprender sobre a nossa história.",
+  "Finalmente um jogo sério que enaltece a nossa cultura angolana!",
+  "Recomendo a todos! Dinheiro na conta e muito aprendizado.",
+  "Minha conta do BAI recebeu em 2 minutos. Top!",
+  "Já espalhei o link nos grupos da família, isto é ouro!",
+  "O suporte deles é óptimo, mas nem precisei, o vídeo explica tudo de primeira.",
+  "Apenas 5.000 Kz de taxa para libertar 180.000 Kz? Muito justo!",
+  "Fiz agora mesmo o pagamento e o saldo já mudou de reservado para disponível, rumo ao banco!",
+  "Simplesmente perfeito! Angola unida no conhecimento e nos prémios!"
+];
+
+const MOCK_CHAT_THREADS = [
+  {
+    messages: [
+      { sender: "Sofia Benguela", text: "Quem conseguiu acertar tudo e fazer as 15 questões impecáveis?" },
+      { sender: "Mauro Nzaji", text: "@Sofia Benguela Eu consegui acertar tudo! Mas tive de pensar bem na do rio Kwanza kkk." },
+      { sender: "Tuanaza Neto", text: "Eu só acertei 10, mas mesmo assim fiz 100.000 Kz! Já é um bom Kwanza!" }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Gelson Lobito", text: "Aquela pergunta de história sobre a rainha Ginga foi um bocado difícil, vacilei e errei." },
+      { sender: "Kiesse Santos", text: "@Gelson Lobito A de história exige atenção, mas acertei 14! Quase perfeito." },
+      { sender: "Jandira Santos", text: "Acertei as 15 completas! O orgulho angolano e o estudo valeram a pena." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Simão Malanje", text: "Fiz apenas 11 acertos por causa da pressão do cronómetro kkkk 😭" },
+      { sender: "Nara de Sousa", text: "@Simão Malanje Pelo menos levaste 110.000 Kz! Vale muito a pena." },
+      { sender: "Simão Malanje", text: "Simmm, já fiz a ativação e caiu em segundos!" }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Duarte Namibe", text: "Alguém errou a das Quedas de Kalandula? Estava na ponta da língua mas baralhei." },
+      { sender: "Adilson Capolo", text: "@Duarte Namibe Eu quase falhei essa! Mas consegui 15/15 no final." },
+      { sender: "Katia Huambo", text: "Eu fiz 12/15, falhei Kalandula também kkk. Mas o dinheiro já está na minha conta!" }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Bernardo Kz", text: "Alguém do Huambo já conseguiu tirar?" },
+      { sender: "Kianda F.", text: "@Bernardo Kz Sim mano! Eu sou do Huambo, fiz com o Banco BIC e caiu agora mesmo!" },
+      { sender: "Valter Semedo", text: "@Bernardo Kz Também sou do Huambo, no Express demorou nem 3 minutos." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Adilson Capolo", text: "Alguém aí que usa o BAI? Quanto tempo demorou?" },
+      { sender: "Benvinda Cruz", text: "@Adilson Capolo O meu no BAI caiu em menos de 1 minuto, foi super rápido!" },
+      { sender: "Matias Ngola", text: "@Adilson Capolo BAI e BFA são quase instantâneos aqui." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Yara de Gouveia", text: "Consigo fazer o levantamento hoje sendo domingo?" },
+      { sender: "Marcos Viana", text: "@Yara de Gouveia Funciona 24h por dia, o sistema de liberação é automático pelo BNA." },
+      { sender: "Kiesse Santos", text: "@Yara Sim! Eu fiz de madrugada ontem e deu super certo." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Zola Fernandes", text: "Esse imposto de 5 mil Kz vai pro BNA direto?" },
+      { sender: "Clélia Ndala", text: "@Zola Fernandes Sim, é a guia fiscal unificada de isenção, eles geram a fatura na Kintu." },
+      { sender: "Zola Fernandes", text: "Ah excelente, entendi agora!" }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Janete Cruz", text: "É obrigatório pagar pela Kintu?" },
+      { sender: "António B.", text: "@Janete Cruz Sim, a Kintu é o portal oficial de faturação integrada deles para o imposto." },
+      { sender: "Mauro Nzaji", text: "Exatamente, é seguro e rastreável pelo código da fatura." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Filipe Cabinda", text: "Epa, alguém de Cabinda que já sacou?" },
+      { sender: "Isabel L.", text: "@Filipe Cabinda Já sim, manguito! Eu tirei pelo Multicaixa Express aqui em Cabinda!" },
+      { sender: "Filipe Cabinda", text: "Sensacional! Vou fazer o meu agora." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Catarina Ndalatando", text: "Se eu tiver saldo do BFA tem algum problema de atraso?" },
+      { sender: "Nzinga Costa", text: "@Catarina Ndalatando Nenhum! BFA aceita super bem a liberação eletrônica, o meu caiu logo." }
+    ]
+  },
+  {
+    messages: [
+      { sender: "Salo Caxito", text: "Eles dão comprovativo da taxa?" },
+      { sender: "Heitor Kassanje", text: "@Salo Caxito Sim, a fatura sai com o número de verificação fiscal tudo certinho." }
+    ]
+  }
+];
+
 const App: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>(GameState.HOME);
+  const [gameState, setGameState] = useState<GameState>(GameState.WELCOME);
   const [stats, setStats] = useState<UserStats>({
     score: 0,
     correctAnswers: 0,
@@ -38,6 +156,8 @@ const App: React.FC = () => {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>(JSON.parse(localStorage.getItem('transacoes') || '[]'));
   const [notifications, setNotifications] = useState<{id: number, text: string}[]>([]);
   const [showFlyingNotes, setShowFlyingNotes] = useState(false);
+  const [spectatorCount, setSpectatorCount] = useState(2415);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   // Som de notificação de saque para causar impacto
   const playNotifSound = () => {
@@ -70,6 +190,89 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (gameState === GameState.VERIFY_TAX) {
+      // Inicia com 4 mensagens aleatórias e bem distribuídas
+      const initial = [];
+      const shuffledComments = [...MOCK_SINGLE_COMMENTS].sort(() => 0.5 - Math.random());
+      for (let i = 0; i < 4; i++) {
+        const name = MOCK_CHAT_USERS[Math.floor(Math.random() * MOCK_CHAT_USERS.length)];
+        initial.push({
+          id: i,
+          name: name,
+          text: shuffledComments[i]
+        });
+      }
+      setChatMessages(initial);
+
+      // Flutuação de Espectadores
+      const specInterval = setInterval(() => {
+        setSpectatorCount(prev => prev + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 6 + 1));
+      }, 3500);
+
+      // Fila interna para suporte a sequências conversacionais (perguntas e respostas sequenciais)
+      let pendingMessages: { name: string, text: string }[] = [];
+      let msgId = 4;
+
+      // Fluxo contínuo de novas mensagens
+      const chatInterval = setInterval(() => {
+        if (pendingMessages.length === 0) {
+          // 45% de hipótese de iniciar um diálogo/pergunta e resposta realista, otherwise mensagem solta
+          if (Math.random() < 0.45) {
+            const randomThread = MOCK_CHAT_THREADS[Math.floor(Math.random() * MOCK_CHAT_THREADS.length)];
+            pendingMessages = randomThread.messages.map(m => ({
+              name: m.sender,
+              text: m.text
+            }));
+          } else {
+            const comment = MOCK_SINGLE_COMMENTS[Math.floor(Math.random() * MOCK_SINGLE_COMMENTS.length)];
+            const name = MOCK_CHAT_USERS[Math.floor(Math.random() * MOCK_CHAT_USERS.length)];
+            pendingMessages = [{ name, text: comment }];
+          }
+        }
+
+        const nextMsg = pendingMessages.shift();
+        if (nextMsg) {
+          setChatMessages(prev => {
+            const updated = [...prev, {
+              id: msgId++,
+              name: nextMsg.name,
+              text: nextMsg.text
+            }];
+            return updated.slice(-6); // Mantém as últimas 6 mensagens visíveis no chat
+          });
+        }
+      }, 3000);
+
+      return () => {
+        clearInterval(specInterval);
+        clearInterval(chatInterval);
+      };
+    }
+  }, [gameState]);
+
+  const playVictoryCascadeSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioCtx();
+      const baseFreqs = [261.63, 329.63, 392.00, 523.25, 587.33, 659.25, 783.99, 1046.50];
+      baseFreqs.forEach((freq, index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.12);
+        
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + index * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.12 + 0.4);
+        
+        osc.start(ctx.currentTime + index * 0.12);
+        osc.stop(ctx.currentTime + index * 0.12 + 0.4);
+      });
+    } catch (e) {}
+  };
+
   const handleQuizComplete = (score: number, correctCount: number, kz: number) => {
     setStats({ 
       score, 
@@ -79,6 +282,19 @@ const App: React.FC = () => {
       bestScoreKz: Math.max(stats.bestScoreKz, kz) 
     });
     setGameState(GameState.RESULTS);
+    setShowFlyingNotes(true);
+    playVictoryCascadeSound();
+    // Keep triggering money shower for victory screen
+    const interval = setInterval(() => {
+      setShowFlyingNotes(prev => {
+        if (!prev) clearInterval(interval);
+        return prev;
+      });
+    }, 2000);
+    setTimeout(() => {
+      setShowFlyingNotes(false);
+      clearInterval(interval);
+    }, 8000);
   };
 
   const handleWithdrawRequest = () => {
@@ -102,51 +318,60 @@ const App: React.FC = () => {
   };
 
   const renderHome = () => (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-center relative">
+    <div className="max-w-4xl mx-auto px-4 py-8 md:py-12 text-center relative">
       <div className="samakaka-pattern"></div>
       
-      <div className="mb-16 relative z-10 animate-bounce-in">
-        <div className="inline-block bg-angola-red px-4 py-1 mb-6 rounded-lg rotate-[-2deg] shadow-lg">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Conhecimento vale Kwanza</span>
+      <div className="mb-8 md:mb-16 relative z-10 animate-bounce-in">
+        <div className="inline-block bg-angola-red px-3 py-1 mb-4 md:mb-6 rounded-lg rotate-[-2deg] shadow-lg">
+          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]">Conhecimento vale Kwanza</span>
         </div>
-        <h1 className="text-8xl md:text-9xl font-black text-white italic tracking-tighter mb-4 leading-none drop-shadow-2xl">
+        <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white italic tracking-tighter mb-4 leading-none drop-shadow-2xl">
           SOU <span className="text-angola-yellow">ANGOLANO</span>
         </h1>
-        <p className="text-zinc-500 font-bold uppercase tracking-[0.5em] text-[10px]">A plataforma número 1 de recompensas culturais</p>
+        <p className="text-zinc-500 font-bold uppercase tracking-[0.2em] sm:tracking-[0.5em] text-[8px] sm:text-[10px]">A plataforma número 1 de recompensas culturais</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 relative z-10">
         <button onClick={() => setGameState(GameState.QUIZ)} 
-          className="group p-10 btn-ganho rounded-[3rem] text-left transform transition-all hover:scale-[1.03] active:scale-95">
+          className="group p-6 md:p-10 btn-ganho rounded-3xl md:rounded-[3rem] text-left transform transition-all hover:scale-[1.03] active:scale-95">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-3xl font-black text-black uppercase italic leading-none">JOGAR &<br/>GANHAR</h3>
-            <span className="text-5xl drop-shadow-md">💰</span>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-black uppercase italic leading-none">JOGAR &<br/>GANHAR</h3>
+            <span className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md">💰</span>
           </div>
-          <p className="text-black/60 font-black uppercase text-xs">GANHE 10.000 Kz POR ACERTO</p>
+          <p className="text-black/60 font-black uppercase text-[10px] md:text-xs">GANHE 10.000 Kz POR ACERTO</p>
         </button>
 
         <button onClick={() => setGameState(GameState.INSTRUCTIONS)} 
-          className="p-10 bg-zinc-900 border-4 border-zinc-800 rounded-[3rem] hover:border-angola-red transition-all text-left transform hover:scale-[1.03]">
+          className="p-6 md:p-10 bg-zinc-900 border-2 md:border-4 border-zinc-800 rounded-3xl md:rounded-[3rem] hover:border-angola-red transition-all text-left transform hover:scale-[1.03]">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-2xl font-black text-white uppercase italic">REGRAS DO<br/>JOGO</h3>
-            <span className="text-4xl opacity-40">📜</span>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase italic">REGRAS DO<br/>JOGO</h3>
+            <span className="text-3xl sm:text-4xl opacity-40">📜</span>
           </div>
-          <p className="text-zinc-500 font-bold uppercase text-xs">VEJA COMO FUNCIONA</p>
+          <p className="text-zinc-500 font-bold uppercase text-[10px] md:text-xs">VEJA COMO FUNCIONA</p>
         </button>
 
         <button onClick={() => setGameState(GameState.RANKING)} 
-          className="p-10 bg-zinc-900 border-4 border-zinc-800 rounded-[3rem] hover:border-white transition-all text-left transform hover:scale-[1.03]">
+          className="p-6 md:p-10 bg-zinc-900 border-2 md:border-4 border-zinc-800 rounded-3xl md:rounded-[3rem] hover:border-white transition-all text-left transform hover:scale-[1.03]">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-2xl font-black text-white uppercase italic">MEUS<br/>SAQUES</h3>
-            <span className="text-4xl opacity-40">🏦</span>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase italic">MEUS<br/>SAQUES</h3>
+            <span className="text-3xl sm:text-4xl opacity-40">🏦</span>
           </div>
-          <p className="text-zinc-500 font-bold uppercase text-xs">HISTÓRICO DE LUCROS</p>
+          <p className="text-zinc-500 font-bold uppercase text-[10px] md:text-xs">HISTÓRICO DE LUCROS</p>
         </button>
 
-        <div className="p-10 bg-gradient-to-br from-zinc-900 to-black border-4 border-zinc-800 rounded-[3rem] text-left relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-125 transition-transform"><span className="text-7xl">🏆</span></div>
-          <h3 className="text-2xl font-black text-zinc-400 uppercase italic mb-4">RANKING TOP 3</h3>
-          <div className="space-y-3 relative z-10">
+        <button onClick={() => setGameState(GameState.AWARDS)} 
+          className="p-6 md:p-10 bg-zinc-900 border-2 md:border-4 border-zinc-800 rounded-3xl md:rounded-[3rem] hover:border-angola-yellow transition-all text-left transform hover:scale-[1.03]">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase italic">PRÉMIOS<br/>CULTURAIS</h3>
+            <span className="text-3xl sm:text-4xl opacity-40">🎁</span>
+          </div>
+          <p className="text-zinc-500 font-bold uppercase text-[10px] md:text-xs">SORTEIOS MENSAIS</p>
+        </button>
+
+        <div className="p-6 md:p-10 bg-gradient-to-br from-zinc-900 to-black border-2 md:border-4 border-zinc-800 rounded-3xl md:rounded-[3rem] text-left relative overflow-hidden group md:col-span-2">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform"><span className="text-5xl md:text-7xl">🏆</span></div>
+          <h3 className="text-lg md:text-2xl font-black text-zinc-400 uppercase italic mb-4">RANKING TOP 3</h3>
+          <div className="space-y-3 relative z-10 text-sm">
             <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-2xl"><span className="text-zinc-100 font-bold">1. Carlos M.</span><span className="text-angola-yellow font-black">1.450.000 Kz</span></div>
             <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-2xl"><span className="text-zinc-400 font-bold">2. Maria C.</span><span className="text-angola-yellow/80 font-black">1.120.000 Kz</span></div>
             <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-2xl"><span className="text-zinc-500 font-bold">3. João K.</span><span className="text-angola-yellow/60 font-black">890.000 Kz</span></div>
@@ -156,32 +381,231 @@ const App: React.FC = () => {
     </div>
   );
 
+  const playWelcomeSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioCtx();
+      
+      // High-energy positive chime chord
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25]; // C-E-G-C-E chord
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+        
+        gain.gain.setValueAtTime(0.08, ctx.currentTime + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.8);
+        
+        osc.start(ctx.currentTime + idx * 0.08);
+        osc.stop(ctx.currentTime + idx * 0.08 + 0.8);
+      });
+    } catch (e) {}
+  };
+
+  const handleEnterPlatform = () => {
+    playWelcomeSound();
+    setGameState(GameState.HOME);
+  };
+
+  const renderWelcome = () => (
+    <div className="max-w-4xl mx-auto px-4 py-8 md:py-12 text-center relative animate-zoom-in min-h-[85vh] flex flex-col justify-center overflow-visible">
+      
+      {/* Background Glowing Ambient Fields (National Colors: Red & Yellow) */}
+      <div className="absolute top-10 left-10 w-[200px] h-[200px] md:w-[450px] md:h-[450px] bg-angola-red rounded-full opacity-35 blur-[100px] md:blur-[120px] pointer-events-none animate-pulse-slow"></div>
+      <div className="absolute bottom-10 right-10 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-angola-yellow rounded-full opacity-25 blur-[110px] md:blur-[130px] pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-angola-red rounded-full opacity-20 blur-[120px] md:blur-[150px] pointer-events-none animate-pulse-slow" style={{ animationDelay: '4s' }}></div>
+
+      <div className="samakaka-pattern opacity-10"></div>
+      
+      {/* Immersive Badge */}
+      <div className="mb-6 md:mb-8 relative z-10">
+        <div className="inline-block bg-zinc-950/90 border border-zinc-800 backdrop-blur-md px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-[0_4px_30px_rgba(227,27,35,0.3)] animate-pulse">
+          <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-zinc-100 block sm:inline">
+            🏆 <span className="text-angola-yellow">CAMPEONATO NACIONAL</span> DE <span className="text-angola-red">CULTURA & RECOMPENSAS</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Main Titles */}
+      <div className="mb-8 md:mb-12 relative z-10">
+        <h1 className="text-5xl sm:text-7xl md:text-9xl font-black text-white italic tracking-tighter mb-4 leading-none drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)] animate-pulse">
+          SOU <span className="text-angola-yellow text-glow-yellow">ANGOLANO</span>
+        </h1>
+        <p className="text-zinc-300 font-extrabold uppercase tracking-[0.2em] sm:tracking-[0.4em] text-[10px] sm:text-xs max-w-2xl mx-auto leading-relaxed">
+          Prepara-te para testar a tua sabedoria. Cada resposta certa vale <span className="text-angola-yellow font-black">10.000 Kz reais</span> na tua carteira.
+        </p>
+      </div>
+
+      {/* Main Cinematic Screen Stack */}
+      <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 relative z-10 mb-8 md:mb-12">
+        
+        {/* Upper Cinematic Hero Banner */}
+        <div className="bg-zinc-900/50 backdrop-blur-xl border-2 md:border-4 border-zinc-800 rounded-3xl md:rounded-[3rem] p-3 md:p-4 shadow-2xl overflow-hidden relative group hover:border-zinc-700 hover:shadow-[0_0_40px_rgba(248,211,8,0.3)] transition-all">
+          <div className="absolute top-4 left-4 md:top-6 md:left-6 z-20 bg-black/90 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[8px] md:text-[10px] font-black text-angola-yellow flex items-center gap-1.5 md:gap-2 border border-zinc-800 tracking-wider md:tracking-widest shadow-lg">
+            <span className="w-2.5 h-2.5 rounded-full bg-angola-yellow animate-pulse"></span>
+            RECOMPENSAS EXCLUSIVAS CULTURAIS
+          </div>
+          
+          <div className="aspect-video w-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black border border-zinc-800 relative group-hover:scale-[1.01] transition-transform duration-500">
+            <img 
+              src={heroImage} 
+              alt="Sou Angolano - Hero" 
+              className="w-full h-full object-cover select-none" 
+              referrerPolicy="no-referrer"
+            />
+            {/* Elegant overlay gradient to show exciting gameplay depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+            <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 text-left">
+              <span className="bg-angola-red/90 text-white font-black uppercase text-[8px] sm:text-[10px] px-2.5 py-1 rounded tracking-[0.15em] shadow-lg mb-2 inline-block animate-bounce">
+                EMPOLGANTE & REAL 💰
+              </span>
+              <h3 className="text-white text-lg sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase leading-none drop-shadow-lg">
+                O Teu Conhecimento Vale Ouro!
+              </h3>
+            </div>
+          </div>
+          
+          <div className="mt-3 px-1 flex flex-col sm:flex-row justify-between items-center text-[8px] md:text-[10px] font-black text-zinc-400 uppercase tracking-widest gap-1 sm:gap-0">
+            <span>🌟 Mostra a tua paixão e sabedoria angolana</span>
+            <span className="text-angola-yellow flex items-center gap-1 animate-pulse">Santuário dos Prêmios Activo 🇦🇴</span>
+          </div>
+        </div>
+
+        {/* Action Card: Name Entry & Launcher */}
+        <div className="bg-zinc-900/70 backdrop-blur-2xl p-6 sm:p-10 md:p-12 rounded-3xl md:rounded-[4rem] border-2 border-zinc-800 shadow-[0_25px_60px_rgba(0,0,0,0.85)] relative overflow-hidden text-center hover:border-zinc-700 hover:shadow-[0_0_40px_rgba(227,27,35,0.2)] transition-all">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-angola-yellow rounded-full opacity-5 blur-3xl"></div>
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-angola-red rounded-full opacity-5 blur-3xl"></div>
+          
+          <div className="max-w-lg mx-auto space-y-5 sm:space-y-6">
+            <div className="space-y-2">
+              <label className="block text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-300">
+                Como Te Chamas? <span className="text-angola-yellow">(Nome do Jogador)</span>
+              </label>
+              <input 
+                type="text" 
+                value={userName} 
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Ex: Carlos Manuel" 
+                className="w-full bg-black/80 border-2 sm:border-4 border-zinc-800 hover:border-zinc-700 focus:border-angola-yellow rounded-2xl sm:rounded-3xl p-4 sm:p-5 outline-none text-white font-black text-center text-base sm:text-lg transition-all placeholder:text-zinc-800 text-uppercase"
+              />
+            </div>
+
+            <button 
+              onClick={handleEnterPlatform}
+              disabled={!userName.trim()}
+              className={`w-full py-5 sm:py-7 font-black rounded-2xl sm:rounded-[2.5rem] uppercase text-sm sm:text-lg md:text-xl transition-all shadow-2xl tracking-wider active:scale-95 duration-150 relative overflow-hidden group ${
+                userName.trim() 
+                  ? 'btn-ganho text-black hover:scale-[1.02] cursor-pointer' 
+                  : 'bg-zinc-800/80 text-zinc-600 opacity-45 cursor-not-allowed border-b-4 border-zinc-950'
+              }`}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <span>ENTRAR NO CAMPEONATO NACIONAL</span>
+                <span className="text-xl sm:text-2xl">🏆</span>
+              </span>
+            </button>
+            
+            <p className="text-[8px] sm:text-[10px] text-zinc-400 font-extrabold uppercase tracking-widest italic">
+              * Apenas contas legítimas de cidadãos nacionais residentes são elegíveis aos saques rápidos
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Decorative summary footer */}
+      <p className="text-zinc-500 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] relative z-10">
+        Plataforma em total conformidade com os regulamentos de promoção cultural do território nacional
+      </p>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-x-hidden selection:bg-angola-yellow selection:text-black">
       <main className="max-w-7xl mx-auto py-12">
+        {gameState === GameState.WELCOME && renderWelcome()}
         {gameState === GameState.HOME && renderHome()}
         {gameState === GameState.QUIZ && <Quiz onComplete={handleQuizComplete} onQuit={() => setGameState(GameState.HOME)} triggerNotification={() => {}} />}
         
         {gameState === GameState.INSTRUCTIONS && (
-           <div className="max-w-2xl mx-auto px-4 py-12 animate-zoom-in">
+           <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 animate-zoom-in">
              <div className="glass-card p-12 rounded-[4rem] border-zinc-700 text-center shadow-2xl relative">
-               <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-angola-yellow text-black px-8 py-2 rounded-full font-black uppercase text-sm italic">O Manual do Ganhador</div>
-               <h2 className="text-4xl font-black text-white mb-10 italic uppercase tracking-tighter">COMO LUCRAR?</h2>
+               <div className="absolute -top-4 sm:-top-6 left-1/2 -translate-x-1/2 bg-angola-yellow text-black px-4 sm:px-8 py-1.5 sm:py-2 rounded-full font-black uppercase text-xs sm:text-sm italic whitespace-nowrap">O Manual do Ganhador</div>
+               <h2 className="text-2xl sm:text-4xl font-black text-white mt-4 mb-8 sm:mb-10 italic uppercase tracking-tighter">COMO LUCRAR?</h2>
                <div className="text-left space-y-8 text-zinc-300 mb-12">
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">1</span>
-                    <p className="font-bold text-lg">Acerte as questões de cultura. Cada acerto vale <span className="text-angola-yellow font-black">10.000 Kz REAIS</span>.</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">Acerte as questões de cultura. Cada acerto vale <span className="text-angola-yellow font-black">10.000 Kz REAIS</span>.</p>
                  </div>
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">2</span>
-                    <p className="font-bold text-lg">Quanto mais rápido responder, maior a sua pontuação no ranking semanal!</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">Quanto mais rápido responder, maior a sua pontuação no ranking semanal!</p>
                  </div>
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">3</span>
-                    <p className="font-bold text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (5.000 Kz)</span> para isenção de impostos.</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (5.000 Kz)</span> para isenção de impostos.</p>
                  </div>
                </div>
-               <button onClick={() => setGameState(GameState.HOME)} className="w-full py-6 bg-zinc-800 text-white font-black rounded-[2rem] hover:bg-zinc-700 transition-all uppercase tracking-widest text-sm border-b-4 border-zinc-950">ENTENDI, QUERO JOGAR</button>
+               <button onClick={() => setGameState(GameState.HOME)} className="w-full py-5 bg-zinc-800 text-white font-black rounded-xl sm:rounded-[2rem] hover:bg-zinc-700 transition-all uppercase tracking-widest text-xs sm:text-sm border-b-4 border-zinc-950">ENTENDI, QUERO JOGAR</button>
+             </div>
+           </div>
+        )}
+
+        {gameState === GameState.AWARDS && (
+           <div className="max-w-2xl mx-auto px-4 py-12 animate-zoom-in">
+             <div className="glass-card p-12 rounded-[4rem] border-zinc-700 text-center shadow-2xl relative">
+               <div className="absolute -top-4 sm:-top-6 left-1/2 -translate-x-1/2 bg-angola-yellow text-black px-4 sm:px-8 py-1.5 sm:py-2 rounded-full font-black uppercase text-xs sm:text-sm italic whitespace-nowrap">Sorteios Mensais</div>
+               <h2 className="text-2xl sm:text-4xl font-black text-white mt-4 mb-4 sm:mb-6 italic uppercase tracking-tighter">PRÉMIOS CULTURAIS</h2>
+               <p className="text-zinc-400 font-bold mb-8 sm:mb-10 text-xs sm:text-sm">Todos os meses sorteamos prémios para os jogadores que mais se destacam no conhecimento da nossa cultura!</p>
+               
+               <div className="text-left space-y-8 text-zinc-300 mb-12">
+                 <div className="bg-zinc-900/80 p-6 rounded-3xl border-2 border-zinc-800">
+                   <h3 className="text-angola-yellow font-black uppercase mb-4 text-xl">COMO FUNCIONA</h3>
+                   <ul className="space-y-3 font-bold text-sm">
+                     <li className="flex items-center gap-3"><span className="text-angola-yellow">🎯</span> Joga o quiz e acumula pontos</li>
+                     <li className="flex items-center gap-3"><span className="text-angola-yellow">🎟️</span> Cada ponto = 1 bilhete virtual</li>
+                     <li className="flex items-center gap-3"><span className="text-angola-yellow">🎲</span> No fim do mês, sorteamos entre os top 10</li>
+                     <li className="flex items-center gap-3"><span className="text-angola-yellow">📈</span> Quanto mais jogas, mais chances tens</li>
+                   </ul>
+                 </div>
+
+                 <div className="bg-zinc-900/80 p-6 rounded-3xl border-2 border-zinc-800">
+                   <h3 className="text-angola-yellow font-black uppercase mb-4 text-xl">PRÉMIOS DO MÊS</h3>
+                   <ul className="space-y-4 font-bold text-sm">
+                     <li className="flex items-center gap-4 bg-zinc-950 p-4 rounded-2xl border border-zinc-800"><span className="text-3xl">🥇</span> <span>Kit Cultura Angolana (Livro + CD + Artesanato)</span></li>
+                     <li className="flex items-center gap-4 bg-zinc-950 p-4 rounded-2xl border border-zinc-800"><span className="text-3xl">🥈</span> <span>Vale 5.000 Kz numa livraria</span></li>
+                     <li className="flex items-center gap-4 bg-zinc-950 p-4 rounded-2xl border border-zinc-800"><span className="text-3xl">🥉</span> <span>Destaque na página + Menção honrosa</span></li>
+                   </ul>
+                 </div>
+
+                 <div className="bg-zinc-900/80 p-6 rounded-3xl border-2 border-zinc-800">
+                   <h3 className="text-angola-yellow font-black uppercase mb-4 text-xl">REGRAS</h3>
+                   <ul className="space-y-3 font-bold text-sm">
+                     <li className="flex items-center gap-3"><span className="text-zinc-500">📌</span> Só jogadores com conta válida</li>
+                     <li className="flex items-center gap-3"><span className="text-zinc-500">📌</span> Um vencedor por mês</li>
+                     <li className="flex items-center gap-3"><span className="text-zinc-500">📌</span> Resultado divulgado no dia 1 de cada mês</li>
+                   </ul>
+                 </div>
+
+                 <div className="bg-zinc-900/80 p-6 rounded-3xl border-2 border-zinc-800">
+                   <h3 className="text-angola-yellow font-black uppercase mb-4 text-xl">VENCEDORES ANTERIORES</h3>
+                   <ul className="space-y-3 font-bold text-sm">
+                     <li className="flex items-center justify-between bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+                       <span className="text-white">Janeiro: Maria da Costa (Luanda)</span>
+                       <span className="text-angola-yellow">2.500 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+                       <span className="text-white">Fevereiro: João Kapango (Benguela)</span>
+                       <span className="text-angola-yellow">2.300 pts</span>
+                     </li>
+                   </ul>
+                 </div>
+               </div>
+               <button onClick={() => setGameState(GameState.HOME)} className="w-full py-6 bg-zinc-800 text-white font-black rounded-[2rem] hover:bg-zinc-700 transition-all uppercase tracking-widest text-sm border-b-4 border-zinc-950">VOLTAR AO MENU</button>
              </div>
            </div>
         )}
@@ -191,7 +615,7 @@ const App: React.FC = () => {
              <div className="glass-card p-12 rounded-[4rem] border-zinc-700 text-center shadow-2xl">
                <div className="flex items-center justify-center gap-4 mb-8">
                   <span className="text-4xl">💰</span>
-                  <h2 className="text-4xl font-black text-angola-yellow italic uppercase tracking-tighter">MINHA BANCA</h2>
+                  <h1 className="text-glow-yellow text-2xl sm:text-4xl font-black text-angola-yellow italic uppercase tracking-tighter">MINHA BANCA</h1>
                </div>
                <div className="space-y-4 mb-10 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                  {allTransactions.length > 0 ? allTransactions.map((t, i) => (
@@ -203,10 +627,10 @@ const App: React.FC = () => {
                            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-black italic">Protocolo: #ANG-{t.id.slice(-8)}</p>
                         </div>
                         <div className="text-right">
-                           <span className="text-2xl font-black text-angola-yellow group-hover:scale-110 block transition-transform">{t.amount.toLocaleString('pt-AO')} Kz</span>
+                           <span className="text-xl sm:text-2xl font-black text-angola-yellow group-hover:scale-110 block transition-transform">{t.amount.toLocaleString('pt-AO')} Kz</span>
                            <div className="inline-flex items-center gap-1 bg-angola-red/10 px-3 py-1 rounded-full mt-2">
                               <div className="w-1.5 h-1.5 bg-angola-red rounded-full animate-pulse"></div>
-                              <span className="text-[9px] text-angola-red uppercase font-black tracking-widest">Status Pendente</span>
+                              <span className="text-[8px] sm:text-[9px] text-angola-red uppercase font-black tracking-widest">Status Pendente</span>
                            </div>
                         </div>
                      </div>
@@ -215,7 +639,7 @@ const App: React.FC = () => {
                      </p>
                      <button 
                        onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
-                       className="mt-4 w-full py-4 bg-angola-red text-white font-black rounded-2xl uppercase tracking-widest text-[10px] animate-pulse shadow-lg hover:scale-105 transition-all border-b-4 border-red-900"
+                       className="mt-4 w-full py-3.5 sm:py-4 bg-angola-red text-white font-black rounded-xl sm:rounded-2xl uppercase tracking-widest text-[9px] sm:text-[10px] animate-pulse shadow-lg hover:scale-105 transition-all border-b-4 border-red-900"
                      >
                        EMITIR A FATURA DE VERIFICAÇÃO
                      </button>
@@ -223,7 +647,7 @@ const App: React.FC = () => {
                  )) : (
                    <div className="py-20 border-4 border-dashed border-zinc-900 rounded-[3rem]">
                       <div className="text-6xl mb-4 opacity-20">💸</div>
-                      <p className="text-zinc-600 font-black uppercase text-sm italic">Sua carteira está vazia.<br/>Vá ganhar algum Kwanza!</p>
+                      <p className="text-zinc-600 font-black uppercase text-xs sm:text-sm italic">Sua carteira está vazia.<br/>Vá ganhar algum Kwanza!</p>
                    </div>
                  )}
                </div>
@@ -233,66 +657,227 @@ const App: React.FC = () => {
         )}
 
         {gameState === GameState.RESULTS && (
-          <div className="min-h-[80vh] flex items-center justify-center p-6 text-center">
-            <div className="glass-card p-12 md:p-20 rounded-[5rem] w-full max-w-3xl border-angola-yellow border-4 gold-glow relative overflow-hidden animate-bounce-in">
+          <div className="min-h-[90vh] flex items-center justify-center p-4 text-center relative overflow-visible">
+            {/* Ambient Background Glowing Areas */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] md:w-[600px] md:h-[600px] bg-angola-yellow rounded-full opacity-10 blur-[150px] pointer-events-none animate-pulse-slow"></div>
+            <div className="absolute top-10 right-10 w-[250px] h-[250px] bg-angola-red rounded-full opacity-10 blur-[130px] pointer-events-none animate-pulse-slow"></div>
+
+            <div className="glass-card p-4 sm:p-8 md:p-16 rounded-3xl md:rounded-[4.5rem] w-full max-w-3xl border-angola-yellow border-2 md:border-4 gold-glow relative overflow-hidden animate-bounce-in shadow-[0_30px_70px_rgba(248,211,8,0.25)]">
+              {/* Top Flag Banner */}
               <div className="absolute top-0 left-0 w-full h-4 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
               
-              <div className="relative z-10">
-                <div className="text-8xl mb-8 animate-bounce">🤑</div>
-                <h2 className="text-6xl md:text-8xl font-black italic mb-4 tracking-tighter text-white">VITÓRIA!</h2>
-                <p className="text-angola-yellow font-black uppercase text-xl mb-12 tracking-[0.3em]">O SEU LUCRO FOI COMPUTADO</p>
-                
-                <div className="bg-zinc-950 p-12 rounded-[3.5rem] border-2 border-zinc-800 mb-12 shadow-inner">
-                  <p className="text-zinc-500 text-xs font-black uppercase mb-4 tracking-widest">Saldo Disponível para Saque</p>
-                  <p className="text-7xl md:text-9xl font-black text-angola-yellow italic drop-shadow-[0_4px_10px_rgba(248,211,8,0.5)]">
-                    {stats.accumulatedKz.toLocaleString()} <span className="text-2xl">Kz</span>
+              <div className="relative z-10 space-y-8">
+                {/* Big Floating Reward Icon */}
+                <div className="relative inline-block select-none pointer-events-auto cursor-pointer group" onClick={() => { playVictoryCascadeSound(); setShowFlyingNotes(true); }}>
+                  <div className="absolute inset-0 bg-angola-yellow opacity-25 rounded-full blur-2xl animate-ping"></div>
+                  <div className="text-8xl md:text-9xl transform active:scale-90 hover:scale-105 duration-100 ease-out transition-all animate-bounce relative z-10 filter drop-shadow-[0_10px_15px_rgba(248,211,8,0.4)]">
+                    💰
+                  </div>
+                  {/* Floating helpful micro-notice */}
+                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-full text-[10px] font-black text-angola-yellow tracking-widest uppercase border border-zinc-800 whitespace-nowrap shadow-lg">
+                    Clica para Chover 💸
+                  </span>
+                </div>
+
+                {/* Explosive Congratulations! */}
+                <div className="space-y-2">
+                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-black italic tracking-tighter text-white uppercase drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
+                    DETONASTE! 🏆
+                  </h2>
+                  <p className="text-angola-yellow text-glow-yellow font-black uppercase text-base sm:text-lg md:text-xl tracking-[0.1em] sm:tracking-[0.2em]">
+                    O TEU DINHEIRO JÁ FOI EMITIDO!
+                  </p>
+                  <p className="text-zinc-400 font-extrabold uppercase text-[11px] tracking-widest max-w-lg mx-auto leading-relaxed">
+                    Parabéns <span className="text-white text-glow-yellow underline">{userName || 'Campeão'}</span>! Foste consagrado no grande campeonato angolano de cultura geral.
                   </p>
                 </div>
 
+                {/* Official Payout Slip Certificate */}
+                <div className="bg-zinc-950/90 rounded-2xl sm:rounded-[3rem] p-4 sm:p-8 md:p-10 border-2 border-zinc-800 relative shadow-inner text-left space-y-4 sm:space-y-6">
+                  {/* Micro header */}
+                  <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
+                    <span className="text-[8px] sm:text-[10px] font-black text-zinc-500 uppercase tracking-[0.1em] sm:tracking-[0.2em] block sm:inline">SOU ANGOLANO SISTEMA GERAL DE RECOMPENSAS</span>
+                    <span className="text-[9px] bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-full font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                      Saldo Reservado
+                    </span>
+                  </div>
+
+                  {/* Large dynamic payout balance */}
+                  <div className="text-center py-4 bg-black/40 rounded-2xl border border-zinc-900 shadow-md">
+                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">TOTAL LÍQUIDO DISPONÍVEL</p>
+                    <p className="text-3xl sm:text-5xl md:text-8xl font-black text-angola-yellow italic text-glow-yellow drop-shadow-[0_5px_15px_rgba(248,211,8,0.4)] tracking-tighter leading-none py-2">
+                      {stats.accumulatedKz.toLocaleString('pt-AO')} <span className="text-2xl font-bold not-italic">Kz</span>
+                    </p>
+                  </div>
+
+                  {/* Certificate Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono text-zinc-400">
+                    <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
+                      <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">BENEFICIÁRIO LEITITIMO</p>
+                      <p className="font-black text-white uppercase text-sm truncate">{userName || 'Jogador Anónimo'}</p>
+                    </div>
+                    <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
+                      <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">CULTURA GERAL DE ANGOLA</p>
+                      <p className="font-black text-white text-sm">PROVA DE {stats.correctAnswers} / 15 ACERTOS ✅</p>
+                    </div>
+                    <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
+                      <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">STATUS ADMINISTRATIVO</p>
+                      <p className="font-black text-green-500 uppercase flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                        APROVADO PARA TRANSFERÊNCIA
+                      </p>
+                    </div>
+                    <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
+                      <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">IMPOSTO DE SOBERANIA</p>
+                      <p className="font-black text-glow-yellow text-angola-yellow">ISENTO - LEI N.º 12/23 (ISENÇÃO FISCAL)</p>
+                    </div>
+                  </div>
+
+                  {/* Payout assurance statement */}
+                  <div className="inner-glow-zinc p-4 rounded-2xl border border-zinc-900 text-[10px] text-zinc-400 leading-relaxed font-bold italic">
+                    📌 * Parabéns pela excelência! O fundo de recompensa nacional garante a integridade desse pagamento. Transfere todo o saldo acumulado diretamente para a tua conta agora mesmo.
+                  </div>
+                </div>
+
+                {/* Big Excitement Actions */}
                 <div className="flex flex-col md:flex-row gap-6">
-                  <button onClick={() => setGameState(GameState.QUIZ)} className="flex-1 py-7 bg-zinc-900 text-white font-black rounded-[2.5rem] uppercase text-sm border-2 border-zinc-800 hover:bg-zinc-800 transition-all">
-                    TURBINAR GANHOS
+                  <button 
+                    onClick={() => { playVictoryCascadeSound(); setGameState(GameState.QUIZ); }} 
+                    className="flex-1 py-5 md:py-7 bg-zinc-950 hover:bg-zinc-900 text-zinc-400 font-black rounded-2xl md:rounded-[2.5rem] uppercase text-xs sm:text-sm border-2 border-zinc-800 hover:border-zinc-700 transition-all select-none cursor-pointer"
+                  >
+                    🔄 TURBINAR MAIS OS MEUS GANHOS
                   </button>
-                  <button onClick={() => setGameState(GameState.WITHDRAW_METHOD)} className="flex-1 py-7 btn-ganho text-black font-black rounded-[2.5rem] text-2xl shadow-2xl uppercase italic animate-pulse">
-                    SACAR TUDO AGORA
+                  <button 
+                    onClick={() => setGameState(GameState.WITHDRAW_METHOD)} 
+                    className="flex-1 py-5 md:py-7 btn-ganho text-black font-black rounded-2xl md:rounded-[2.5rem] text-sm sm:text-lg md:text-xl shadow-[0_12px_40px_rgba(248,211,8,0.55)] hover:scale-105 active:scale-95 uppercase italic animate-pulse cursor-pointer relative overflow-hidden group select-none"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      <span>SACAR TODO O MEU SALDO CASHOUT</span>
+                      <span className="text-3xl">🏧</span>
+                    </span>
                   </button>
                 </div>
               </div>
 
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-angola-red rounded-full opacity-10 blur-3xl"></div>
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-angola-yellow rounded-full opacity-20 blur-3xl"></div>
+              {/* Decorative side blurs */}
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-angola-red rounded-full opacity-20 blur-3xl"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-angola-yellow rounded-full opacity-30 blur-3xl"></div>
             </div>
           </div>
         )}
 
         {gameState === GameState.WITHDRAW_METHOD && (
-          <div className="max-w-xl mx-auto p-6 animate-zoom-in">
-            <div className="glass-card p-12 rounded-[4rem] border-zinc-800 shadow-2xl">
-              <h2 className="text-3xl font-black text-angola-yellow italic mb-10 uppercase text-center">RECEPÇÃO DE VALORES</h2>
-              <div className="space-y-4 mb-10">
-                <input type="text" value={userName} onChange={e => setUserName(e.target.value)} placeholder="Nome do Beneficiário" className="w-full bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-6 outline-none focus:border-angola-yellow text-white font-black text-lg transition-all" />
+          <div className="max-w-xl mx-auto p-4 sm:p-6 animate-zoom-in">
+            <div className="glass-card p-5 sm:p-10 rounded-3xl sm:rounded-[4rem] border-zinc-800 shadow-2xl relative overflow-hidden">
+              {/* Dynamic Flag Accent Side */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+              
+              <h2 className="text-2xl sm:text-3xl font-black text-angola-yellow italic mb-2 uppercase text-center mt-2">RECEPÇÃO DE VALORES</h2>
+              
+              {/* Game Payout Progress Stepper Tracker */}
+              <div className="flex justify-center items-center gap-2 mb-8 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                <span className="text-angola-yellow">1. ID de Elite</span>
+                <span className="text-zinc-700">➔</span>
+                <span>2. Rede</span>
+                <span className="text-zinc-700">➔</span>
+                <span>3. Finalizar</span>
+              </div>
+
+              {/* Dynamic Interactive Angolan Winner ID Card ("Bilhete de Cidadão Premiado") */}
+              <div className="bg-gradient-to-br from-zinc-900 to-black p-4 sm:p-6 rounded-2xl border-2 border-angola-yellow/50 shadow-inner relative overflow-hidden mb-8 group hover:border-angola-yellow transition-all duration-300">
+                {/* Micro holographic crest pattern & flag ribbon lines */}
+                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-l from-angola-red/20 via-angola-yellow/20 to-transparent rounded-bl-full pointer-events-none"></div>
                 
-                <div onClick={() => setSelectedMethod(WithdrawMethod.BANK_TRANSFER)} className={`opcao-deposito ${selectedMethod === WithdrawMethod.BANK_TRANSFER ? 'selecionado border-4' : 'border-4 border-zinc-900'} p-8 rounded-[2.5rem] transition-all`}>
-                   <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-black text-xl">💳 BANCO (IBAN)</p>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">Transferência Interbancária</p>
-                      </div>
-                      <span className="text-3xl">🏛️</span>
-                   </div>
+                {/* Header of the ID Card */}
+                <div className="flex justify-between items-start border-b border-zinc-800 pb-3 mb-4">
+                  <div>
+                    <span className="text-[7px] sm:text-[8px] font-black text-zinc-500 uppercase tracking-widest block">REPÚBLICA DE ANGOLA</span>
+                    <span className="text-[9px] sm:text-[10px] font-extrabold text-white uppercase tracking-wider block">BILHETE DE JOGADOR PATRIOTA</span>
+                  </div>
+                  <div className="bg-gradient-to-b from-yellow-400 to-yellow-600 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md">
+                    🇦🇴
+                  </div>
                 </div>
-                
-                <div onClick={() => setSelectedMethod(WithdrawMethod.MULTICAIXA)} className={`opcao-deposito ${selectedMethod === WithdrawMethod.MULTICAIXA ? 'selecionado border-4' : 'border-4 border-zinc-900'} p-8 rounded-[2.5rem] transition-all`}>
-                   <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-black text-xl">🏧 MULTICAIXA EXPRESS</p>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">Levantamento sem cartão</p>
+
+                {/* ID Card Body */}
+                <div className="flex gap-4 items-center">
+                  {/* Digital Avatar Hologram with live status */}
+                  <div className="relative">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-zinc-950 rounded-xl border border-zinc-800 flex flex-col justify-center items-center relative overflow-hidden shadow-inner font-black text-center">
+                      <span className="text-3xl filter hover:scale-110 duration-200 transition-transform select-none">🏆</span>
+                      <div className="absolute bottom-0 left-0 w-full bg-angola-yellow text-[7px] text-black font-black py-0.5 tracking-wider uppercase">
+                        {stats.correctAnswers}/15 ACERTOS
                       </div>
-                      <span className="text-3xl">📱</span>
-                   </div>
+                    </div>
+                    {/* Glowing pulse indicator */}
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900 animate-ping"></span>
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900"></span>
+                  </div>
+
+                  {/* Dynamic user information displayed in a neat grid */}
+                  <div className="flex-1 space-y-1 text-xs">
+                    <div>
+                      <p className="text-[7px] sm:text-[8px] text-zinc-500 font-bold uppercase tracking-widest">NOME DO BENEFICIÁRIO</p>
+                      <p className="font-extrabold text-white text-xs sm:text-sm tracking-tight uppercase min-h-[1.25rem] border-b border-zinc-850">
+                        {userName ? userName : <span className="text-zinc-600 italic">Escreva o seu nome abaixo...</span>}
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[8px] sm:text-[9px]">
+                      <div>
+                        <p className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">SALDO ACUMULADO</p>
+                        <p className="font-black text-angola-yellow uppercase">{stats.accumulatedKz.toLocaleString('pt-AO')} Kz</p>
+                      </div>
+                      <div>
+                        <p className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">ESTADO DO ALVARÁ</p>
+                        <p className="font-black text-green-500 uppercase animate-pulse">AUTORIZADO ✓</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Micro Footnote */}
+                <div className="mt-4 pt-2.5 border-t border-zinc-900 flex justify-between items-center text-[7px] text-zinc-500 font-bold uppercase tracking-widest">
+                  <span>VALIDADO INTEGRALMENTE PELO BNA</span>
+                  <span className="text-angola-yellow">SOU ANGOLANO PROVADO</span>
                 </div>
               </div>
-              <button disabled={!selectedMethod || !userName} onClick={() => setGameState(selectedMethod === WithdrawMethod.BANK_TRANSFER ? GameState.WITHDRAW_BANK : GameState.WITHDRAW_FORM)} className={`w-full py-7 font-black rounded-[2.5rem] uppercase text-xl transition-all ${selectedMethod && userName ? 'btn-ganho text-black shadow-2xl' : 'bg-zinc-900 text-zinc-700 opacity-50 cursor-not-allowed'}`}>
+
+              {/* Inputs & options */}
+              <div className="space-y-4 mb-8">
+                <div>
+                  <label className="text-zinc-400 text-[10px] font-black uppercase tracking-widest block mb-2 text-left pl-2">A QUEM SERÁ DIRECCIONADO O REPASSE?</label>
+                  <input type="text" value={userName} onChange={e => setUserName(e.target.value)} placeholder="Nome do Beneficiário" className="w-full bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-6 outline-none focus:border-angola-yellow text-white font-black text-lg transition-all shadow-inner" />
+                </div>
+                
+                <div className="pt-2">
+                  <label className="text-zinc-400 text-[10px] font-black uppercase tracking-widest block mb-2 text-left pl-2">MÉTODO DE CASHOUT PREFERENCIAL</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div onClick={() => setSelectedMethod(WithdrawMethod.BANK_TRANSFER)} className={`opcao-deposito ${selectedMethod === WithdrawMethod.BANK_TRANSFER ? 'selecionado border-4 bg-zinc-900/40' : 'border-4 border-zinc-900 bg-zinc-950'} p-5 sm:p-6 rounded-2xl cursor-pointer transition-all hover:border-zinc-800`}>
+                       <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-black text-sm">💳 BANCO (IBAN)</p>
+                            <p className="text-[8px] text-zinc-500 font-bold uppercase mt-1">Interbancária</p>
+                          </div>
+                          <span className="text-2xl">🏛️</span>
+                       </div>
+                    </div>
+                    
+                    <div onClick={() => setSelectedMethod(WithdrawMethod.MULTICAIXA)} className={`opcao-deposito ${selectedMethod === WithdrawMethod.MULTICAIXA ? 'selecionado border-4 bg-zinc-900/40' : 'border-4 border-zinc-900 bg-zinc-950'} p-5 sm:p-6 rounded-2xl cursor-pointer transition-all hover:border-zinc-800`}>
+                       <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-black text-sm">🏧 MULTICAIXA</p>
+                            <p className="text-[8px] text-zinc-500 font-bold uppercase mt-1">Levantamento sem cartão</p>
+                          </div>
+                          <span className="text-2xl">📱</span>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button disabled={!selectedMethod || !userName} onClick={() => setGameState(selectedMethod === WithdrawMethod.BANK_TRANSFER ? GameState.WITHDRAW_BANK : GameState.WITHDRAW_FORM)} className={`w-full py-5 sm:py-7 font-black rounded-2xl sm:rounded-[2.5rem] uppercase text-sm sm:text-xl transition-all ${selectedMethod && userName ? 'btn-ganho text-black shadow-2xl scale-100 hover:scale-[1.02] active:scale-95' : 'bg-zinc-900 text-zinc-700 opacity-50 cursor-not-allowed'}`}>
                 CONTINUAR LEVANTAMENTO
               </button>
             </div>
@@ -300,116 +885,393 @@ const App: React.FC = () => {
         )}
 
         {gameState === GameState.WITHDRAW_BANK && (
-          <div className="max-w-xl mx-auto p-6 animate-zoom-in">
-            <div className="glass-card p-12 rounded-[4rem] border-zinc-800">
-              <h2 className="text-3xl font-black italic mb-10 text-center">🏦 REDE BANCÁRIA</h2>
-              <div className="space-y-3 mb-10 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
+          <div className="max-w-xl mx-auto p-4 sm:p-6 animate-zoom-in">
+            <div className="glass-card p-5 sm:p-10 rounded-3xl sm:rounded-[4rem] border-zinc-800 relative overflow-hidden">
+              {/* Dynamic Flag Accent Side */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+              
+              <h2 className="text-2xl sm:text-3xl font-black italic mb-2 text-center mt-2">🏦 REDE BANCÁRIA</h2>
+              
+              {/* Game Payout Progress Stepper Tracker */}
+              <div className="flex justify-center items-center gap-2 mb-8 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                <span className="text-green-500">1. ID de Elite ✓</span>
+                <span className="text-zinc-700">➔</span>
+                <span className="text-angola-yellow">2. Rede</span>
+                <span className="text-zinc-700">➔</span>
+                <span>3. Finalizar</span>
+              </div>
+
+              <div className="space-y-3 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {BANCOS_ANGOLA.map(b => (
-                  <div key={b.id} onClick={() => setSelectedBank(b)} className={`p-6 bg-zinc-950 rounded-3xl cursor-pointer border-4 transition-all ${selectedBank?.id === b.id ? 'border-angola-yellow bg-zinc-900 shadow-lg' : 'border-zinc-900 hover:border-zinc-800'}`}>
-                    <p className="font-black text-white">{b.name}</p>
-                    <p className="text-[10px] text-zinc-600 font-bold">Código Swift: {b.code}</p>
+                  <div key={b.id} onClick={() => setSelectedBank(b)} className={`p-4 sm:p-5 bg-zinc-950 rounded-2xl sm:rounded-3xl cursor-pointer border-2 sm:border-4 transition-all ${selectedBank?.id === b.id ? 'border-angola-yellow bg-zinc-900 shadow-lg scale-[1.01]' : 'border-zinc-900 hover:border-zinc-800'}`}>
+                    <p className="font-black text-white text-sm sm:text-base">{b.name}</p>
+                    <p className="text-[10px] text-zinc-650 font-bold tracking-widest uppercase mt-1">Código Swift: {b.code}</p>
                   </div>
                 ))}
               </div>
+
               <div className="flex gap-4">
-                <button onClick={() => setGameState(GameState.WITHDRAW_METHOD)} className="flex-1 py-5 bg-zinc-900 rounded-2xl font-black uppercase text-xs">Voltar</button>
-                <button disabled={!selectedBank} onClick={() => setGameState(GameState.WITHDRAW_FORM)} className={`flex-1 py-5 font-black rounded-2xl uppercase text-sm ${selectedBank ? 'bg-angola-yellow text-black' : 'bg-zinc-900 opacity-50'}`}>Confirmar Banco</button>
+                <button onClick={() => setGameState(GameState.WITHDRAW_METHOD)} className="flex-1 py-4 sm:py-5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 rounded-2xl font-black uppercase text-xs transition-colors">Voltar</button>
+                <button disabled={!selectedBank} onClick={() => setGameState(GameState.WITHDRAW_FORM)} className={`flex-1 py-4 sm:py-5 font-black rounded-2xl uppercase text-xs sm:text-sm transition-all ${selectedBank ? 'bg-angola-yellow hover:bg-yellow-400 text-black shadow-lg scale-100' : 'bg-zinc-900 text-zinc-600 opacity-50 cursor-not-allowed'}`}>Confirmar Banco</button>
               </div>
             </div>
           </div>
         )}
 
         {gameState === GameState.WITHDRAW_FORM && (
-          <div className="max-w-xl mx-auto p-6 animate-zoom-in">
-            <div className="glass-card p-12 rounded-[4rem] border-zinc-800 text-center">
-              <div className="text-6xl mb-6">🔒</div>
-              <h2 className="text-3xl font-black italic mb-10 uppercase">FINALIZAR DADOS</h2>
-              <div className="space-y-6 mb-12">
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+          <div className="max-w-xl mx-auto p-4 sm:p-6 animate-zoom-in">
+            <div className="glass-card p-5 sm:p-10 rounded-3xl sm:rounded-[4rem] border-zinc-800 text-center relative overflow-hidden">
+              {/* Dynamic Flag Accent Side */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+              
+              <div className="text-5xl mb-4 mt-2">🔒</div>
+              <h2 className="text-2xl sm:text-3xl font-black italic mb-2 uppercase text-center">FINALIZAR DADOS</h2>
+              
+              {/* Game Payout Progress Stepper Tracker */}
+              <div className="flex justify-center items-center gap-2 mb-8 text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                <span className="text-green-500">1. ID de Elite ✓</span>
+                <span className="text-zinc-700">➔</span>
+                <span className="text-green-500">2. Rede ✓</span>
+                <span className="text-zinc-700">➔</span>
+                <span className="text-angola-yellow animate-pulse">3. Finalizar</span>
+              </div>
+
+              <div className="space-y-6 mb-8">
+                <p className="text-zinc-450 text-[10px] sm:text-xs font-black uppercase tracking-widest text-center">
                   {selectedMethod === WithdrawMethod.BANK_TRANSFER ? 'Digite o seu IBAN Completo (21 dígitos)' : 'Digite o seu Número Multicaixa (9 dígitos)'}
                 </p>
-                <input value={withdrawInput} onChange={e => setWithdrawInput(e.target.value.replace(/\D/g, ''))} className="w-full bg-zinc-950 border-4 border-zinc-900 rounded-3xl p-6 outline-none focus:border-angola-yellow font-mono text-2xl text-white text-center tracking-widest" placeholder={selectedMethod === WithdrawMethod.BANK_TRANSFER ? "00..." : "9..."} />
-                <div className="bg-zinc-900/50 p-6 rounded-3xl text-left border border-zinc-800">
-                  <p className="text-zinc-500 text-[9px] font-black uppercase mb-2">Resumo da Operação</p>
-                  <div className="flex justify-between text-sm"><span>Valor Bruto:</span> <span className="text-white font-black">{stats.accumulatedKz.toLocaleString()} Kz</span></div>
-                  <div className="flex justify-between text-sm"><span>Taxas:</span> <span className="text-angola-red font-black">0,00 Kz (Isento)</span></div>
+                
+                <input value={withdrawInput} onChange={e => setWithdrawInput(e.target.value.replace(/\D/g, ''))} className="w-full bg-zinc-950 border-2 sm:border-4 border-zinc-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 outline-none focus:border-angola-yellow font-mono text-lg sm:text-2xl text-white text-center tracking-widest" placeholder={selectedMethod === WithdrawMethod.BANK_TRANSFER ? "00..." : "9..."} />
+                
+                <div className="bg-zinc-950 p-5 rounded-2xl text-left border border-zinc-900 space-y-2">
+                  <p className="text-zinc-500 text-[9px] font-black uppercase tracking-widest mb-1.5 border-b border-zinc-900 pb-1.5">Resumo da Operação de Liberação</p>
+                  <div className="flex justify-between text-xs text-zinc-400"><span>Beneficiário:</span> <span className="text-white font-black uppercase">{userName}</span></div>
+                  {selectedMethod === WithdrawMethod.BANK_TRANSFER && selectedBank && (
+                    <div className="flex justify-between text-xs text-zinc-400"><span>Banco Destino:</span> <span className="text-white font-black uppercase">{selectedBank.name.split(' - ')[0]}</span></div>
+                  )}
+                  <div className="flex justify-between text-xs text-zinc-400"><span>Canal de Rede:</span> <span className="text-white font-black">{selectedMethod === WithdrawMethod.BANK_TRANSFER ? 'Transferência IBAN' : 'Multicaixa Express'}</span></div>
+                  <div className="flex justify-between text-xs text-zinc-400"><span>Valor Bruto:</span> <span className="text-angola-yellow font-black">{stats.accumulatedKz.toLocaleString()} Kz</span></div>
+                  <div className="flex justify-between text-xs text-zinc-400"><span>Garantia Governamental:</span> <span className="text-green-500 font-extrabold uppercase">Totalmente Isento (Lei 12/23)</span></div>
                 </div>
               </div>
-              <button onClick={handleWithdrawRequest} className="w-full py-8 btn-ganho text-black font-black rounded-[3rem] uppercase tracking-widest shadow-2xl text-xl animate-pulse">
+              <button disabled={withdrawInput.length < (selectedMethod === WithdrawMethod.BANK_TRANSFER ? 10 : 9)} onClick={handleWithdrawRequest} className="w-full py-5 sm:py-7 btn-ganho text-black font-black rounded-2xl sm:rounded-[3rem] uppercase tracking-widest shadow-2xl text-base sm:text-lg animate-pulse">
                 CONFIRMAR SAQUE AGORA
               </button>
+              
+              <button onClick={() => setGameState(selectedMethod === WithdrawMethod.BANK_TRANSFER ? GameState.WITHDRAW_BANK : GameState.WITHDRAW_METHOD)} className="w-full mt-4 py-3 bg-transparent hover:bg-zinc-900 text-zinc-500 text-xs font-black uppercase hover:text-zinc-300 transition-colors">Voltar</button>
             </div>
           </div>
         )}
 
         {gameState === GameState.WITHDRAW_CONFIRM && (
-          <div className="max-w-xl mx-auto p-4 animate-bounce-in">
-            <div className="comprovante rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-              <div className="bg-green-600 text-white p-6 rounded-2xl mb-8 text-center font-black text-xl italic uppercase tracking-tighter shadow-lg">✅ LEVANTAMENTO SOLICITADO!</div>
-              <div className="text-center border-b-4 border-black pb-6 mb-8">
-                 <h3 className="text-2xl font-black uppercase italic">Comprovante de Saque</h3>
-                 <p className="text-[10px] font-bold text-zinc-500 mt-2">SOU ANGOLANO RECOMPENSAS</p>
+          <div className="max-w-xl mx-auto p-4 animate-bounce-in relative overflow-visible">
+            
+            {/* Glowing Aura Backplates */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-green-600 rounded-full opacity-15 blur-[120px] pointer-events-none animate-pulse-slow"></div>
+            
+            <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-6 md:p-8 shadow-[0_30px_70px_rgba(0,0,0,0.8)] relative z-10 transition-all hover:border-zinc-700">
+              
+              {/* Receipt Header Badge */}
+              <div className="bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 text-white px-6 py-4 rounded-2xl mb-6 text-center shadow-[0_4px_20px_rgba(16,185,129,0.35)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                <p className="text-[10px] font-black tracking-[0.2em] opacity-80 uppercase">AUTORIZAÇÃO DE TRANSACÇÃO CONCLUÍDA</p>
+                <h3 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase mt-1 flex items-center justify-center gap-2">
+                  <span>ORDEM DE LEVANTAMENTO EMITIDA</span>
+                  <span className="text-2xl animate-pulse">💸</span>
+                </h3>
               </div>
-              <div className="space-y-4 text-sm font-mono mb-10">
-                <div className="flex justify-between border-b border-zinc-200 pb-2"><span>JOGADOR:</span> <span className="font-black uppercase">{lastTransaction?.name}</span></div>
-                <div className="flex justify-between border-b border-zinc-200 pb-2"><span>VALOR TOTAL:</span> <span className="font-black text-2xl">{lastTransaction?.amount.toLocaleString()} Kz</span></div>
-                <div className="flex justify-between border-b border-zinc-200 pb-2"><span>MÉTODO:</span> <span className="font-black uppercase">{lastTransaction?.method}</span></div>
-                <div className="flex justify-between border-b-4 border-black pb-2 text-angola-red font-black"><span>TAXA DE VERIFICAÇÃO:</span> <span>5.000 Kz</span></div>
+
+              {/* Main Physical Bank Receipt Wrapper */}
+              <div className="comprovante rounded-[2rem] shadow-[0_15px_35px_rgba(0,0,0,0.55)] p-6 md:p-8 border-t-8 border-b-8 border-dashed border-zinc-200 relative overflow-hidden">
+                
+                {/* Simulated Bank Hologram Security Stripe */}
+                <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-angola-red via-angola-yellow to-angola-red opacity-15"></div>
+                
+                {/* Central Bank Crest / Seal header */}
+                <div className="text-center border-b-2 border-dashed border-zinc-300 pb-6 mb-6 relative">
+                  <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-md relative group border border-amber-500 select-none">
+                     <span className="text-2xl group-hover:rotate-12 transition-transform">🏦</span>
+                     <div className="absolute inset-0 bg-yellow-400 opacity-20 rounded-full blur-md animate-ping"></div>
+                  </div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900">REPÚBLICA DE ANGOLA</h4>
+                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">SISTEMA DE PAGAMENTO EM TEMPO REAL (SPTR)</p>
+                  <p className="text-[8px] font-extrabold text-amber-600 uppercase tracking-[0.2em] mt-0.5">SISTEMA INTEGRADO REVOLUCIONÁRIO • REGULADO PELO BNA</p>
+                </div>
+
+                {/* Substantive Payout Slips Table */}
+                <div className="space-y-3.5 text-xs font-mono text-zinc-800 border-b-2 border-dashed border-zinc-300 pb-6 mb-6">
+                  
+                  {/* Transaction Reference ID Row */}
+                  <div className="bg-zinc-50 p-3 rounded-lg border border-zinc-200/60 font-mono text-[10px] space-y-1">
+                    <p className="font-extrabold text-zinc-400 uppercase tracking-widest text-[8px]">ORDEM DE OPERAÇÃO REGISTADA</p>
+                    <div className="flex justify-between items-center text-zinc-900 font-black">
+                      <span>CHAVE DE ACESSO BNA:</span>
+                      <span className="text-amber-600 underline text-right">{lastTransaction?.id || 'REF-BNA-' + Date.now()}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">ORGANIZAÇÃO EMISSORA:</span> 
+                    <span className="font-black text-zinc-900 uppercase">SOU ANGOLANO RECOMPENSAS</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">BENEFICIÁRIO TITULAR:</span> 
+                    <span className="font-black text-zinc-900 uppercase">{lastTransaction?.name || userName}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">INSTITUIÇÃO BANCÁRIA:</span> 
+                    <span className="font-black text-amber-600 uppercase">{lastTransaction?.bank || 'Multicaixa Integrado'}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">MÉTODO TRANSACCIONAL:</span> 
+                    <span className="font-black text-zinc-900 uppercase">{lastTransaction?.method}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">CONTA DESTINO (IBAN/TLF):</span> 
+                    <span className="font-black text-zinc-900 font-mono">
+                      {lastTransaction?.code ? (lastTransaction.code.length > 8 ? `***${lastTransaction.code.slice(-5)}` : lastTransaction.code) : 'Multicaixa Activo'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <span className="text-zinc-500 uppercase font-black tracking-tight text-[10px]">TARIFA DE TRANSFERÊNCIA:</span> 
+                    <span className="font-black text-green-600 uppercase">0,00 Kz (ISENÇÃO FISCAL CULTURAL)</span>
+                  </div>
+
+                  {/* Nominal Winnings Cash Display */}
+                  <div className="bg-zinc-950 text-center py-5 rounded-2xl my-3 border border-zinc-900 relative shadow-inner">
+                    <p className="text-[8px] text-zinc-500 font-black tracking-widest mt-1">MONTANTE NOMINAL DE TRANSFERÊNCIA ADJUDICADO</p>
+                    <p className="text-4xl md:text-5xl font-black text-glow-yellow text-angola-yellow italic tracking-tighter mt-1">
+                      {lastTransaction?.amount.toLocaleString('pt-AO')} <span className="text-xl font-bold not-italic">Kz</span>
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center text-red-600 font-black pt-2">
+                    <span className="text-zinc-900 uppercase font-black tracking-tight text-[10px]">ESTADO DE LIBERAÇÃO:</span> 
+                    <span className="uppercase tracking-wider flex items-center gap-1.5 animate-pulse text-xs bg-red-100/80 px-3 py-1 rounded-full border border-red-200">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600 animate-pulse"></span>
+                      </span>
+                      RETIDO EM LIQUIDAÇÃO SPTR
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between border-t border-zinc-300 pt-3 text-amber-700 font-black text-[11px] leading-tight">
+                    <span>TAXA DE VERIFICAÇÃO DE DADOS (AGT/BNA):</span> 
+                    <span className="text-right">5.000 Kz</span>
+                  </div>
+                </div>
+
+                {/* Circular "Verified Audit" Stamp (Selo de Certificação) */}
+                <div className="relative h-20 w-full flex items-center justify-between pointer-events-none mt-4 select-none">
+                  {/* CSS barcode strip */}
+                  <div className="flex flex-col text-left">
+                    <div className="flex justify-start items-center gap-0.5 tracking-[-0.2em] font-mono text-zinc-900 text-base leading-none">
+                      ||||| | ||| || |||| | | |||||| ||| ||| | ||| |
+                    </div>
+                    <span className="text-[6px] text-zinc-400 font-mono tracking-widest uppercase mt-1">DISPOSITIVO DE VERIFICAÇÃO BNA-CERT-AO/12-23</span>
+                  </div>
+
+                  {/* Red/Amber Stamp Emblem */}
+                  <div className="w-20 h-20 border-2 border-dashed border-red-500 rounded-full flex flex-col items-center justify-center p-1 transform rotate-12 bg-white scale-90 relative">
+                    <span className="text-[6px] text-red-500 font-black text-center tracking-tighter leading-none uppercase">AUTENTICAÇÃO</span>
+                    <span className="text-[9px] text-red-600 font-black text-center border-y border-red-400 py-0.5 my-0.5 tracking-tighter uppercase">REGULADO BNA</span>
+                    <span className="text-[6px] text-red-500 font-bold text-center tracking-tight leading-none uppercase">MINFIN/AGT</span>
+                  </div>
+                </div>
+
               </div>
-              <div className="bg-zinc-100 p-6 rounded-2xl mb-8 border-2 border-dashed border-zinc-300">
-                <p className="text-[10px] font-black text-zinc-400 uppercase mb-2">Atenção Jogador</p>
-                <p className="text-[11px] leading-relaxed italic font-bold text-zinc-700">O seu prêmio está reservado. Para liberação imediata nos sistemas bancários angolanos, proceda com a verificação de isenção fiscal conforme a Lei n.º 12/23.</p>
+
+              {/* Informative Security Guarantee Card */}
+              <div className="bg-zinc-950/80 border border-zinc-800 p-6 rounded-3xl mt-6 mb-6">
+                <p className="text-[10px] font-black text-zinc-400 uppercase mb-2 tracking-widest">📌 NOTA EXPLICATIVA FINANCEIRA (BNA & AGT)</p>
+                <p className="text-[11px] leading-relaxed italic font-bold text-zinc-300">
+                  Sob regulamento do Banco Nacional de Angola, todos os prêmios culturais do concurso "Sou Angolano" estão totalmente isentos de encargos tributários de renda ou imposto de selo (Isenção Federal Lei n.º 12/23). Para a transferência ser imediata no Pix/IBAN nacional, proceda com o pagamento da taxa de verificação para desbloquear os seus milhões retidos com segurança.
+                </p>
               </div>
-              <button onClick={() => setGameState(GameState.VERIFY_TAX)} className="w-full py-7 bg-angola-red text-white font-black rounded-3xl uppercase text-xl border-b-8 border-red-900 shadow-xl active:scale-95 transition-all">
-                PAGAR TAXA & RECEBER TUDO
+
+              {/* Premium Interactive Action Triggers */}
+              <button 
+                onClick={() => setGameState(GameState.VERIFY_TAX)} 
+                className="w-full py-7 bg-gradient-to-r from-angola-red to-red-600 text-white font-black rounded-[2rem] uppercase tracking-wider text-lg border-b-8 border-red-900 shadow-[0_12px_40px_rgba(227,27,35,0.4)] active:scale-95 duration-100 transition-all active:border-b-2 select-none cursor-pointer flex items-center justify-center gap-3"
+              >
+                <span>PAGAR TAXA PROCESSUAL & SACAR TUDO</span>
+                <span className="text-2xl animate-spin" style={{ animationDuration: '3s' }}>✨</span>
               </button>
+
             </div>
           </div>
         )}
 
         {gameState === GameState.VERIFY_TAX && (
-          <div className="max-w-3xl mx-auto py-12 px-4 animate-fade-in">
-            <div className="glass-card p-12 md:p-16 rounded-[5rem] border-angola-red border-4 shadow-2xl relative text-center">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-angola-red text-white px-8 py-2 rounded-full font-black uppercase text-xs animate-pulse">ALERTA DE SEGURANÇA</div>
-              
-              <h2 className="text-4xl md:text-5xl font-black text-angola-red italic uppercase mb-12 animate-pulse-red drop-shadow-lg">ÚLTIMO PASSO PARA O SAQUE</h2>
-              
-              <div className="bg-zinc-950 p-10 rounded-[3.5rem] mb-12 border-2 border-zinc-900 shadow-inner">
-                <div className="text-7xl mb-8 animate-bounce">⏳</div>
-                <h3 className="text-white font-black text-2xl mb-6">Aguardando Validação Fiscal</h3>
-                <div className="max-w-sm mx-auto">
-                   <div className="flex justify-between text-[10px] font-black text-zinc-500 uppercase mb-3">
-                      <span>Processamento Bancário</span>
-                      <span>88%</span>
-                   </div>
-                   <div className="h-4 w-full bg-zinc-900 rounded-full overflow-hidden border-2 border-zinc-800">
-                      <div className="h-full bg-gradient-to-r from-angola-red to-angola-yellow w-[88%] shadow-[0_0_15px_rgba(227,27,35,0.5)]"></div>
-                   </div>
-                </div>
-                <p className="text-[10px] text-zinc-500 mt-6 font-black uppercase tracking-widest italic">O tempo de reserva expira em: <span className="text-angola-yellow">23h 59m</span></p>
-              </div>
+          <div className="max-w-5xl mx-auto py-8 px-4 animate-fade-in relative overflow-visible">
+            
+            {/* National Ambient Blurs */}
+            <div className="absolute top-10 left-10 w-[300px] h-[300px] bg-angola-red rounded-full opacity-20 blur-[130px] pointer-events-none animate-pulse-slow"></div>
+            <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-angola-yellow rounded-full opacity-15 blur-[130px] pointer-events-none animate-pulse-slow"></div>
 
-              <div className="space-y-6">
-                <button 
-                  onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
-                  className="w-full py-8 btn-ganho text-black font-black rounded-[3rem] text-2xl uppercase shadow-[0_10px_40px_rgba(248,211,8,0.4)] border-b-8 border-yellow-700 hover:scale-110 active:scale-95 transition-all animate-pulse"
-                >
-                  EMITIR A FATURA DE VERIFICAÇÃO
-                </button>
+            <div className="bg-zinc-900/90 backdrop-blur-2xl p-4 sm:p-6 md:p-12 rounded-3xl md:rounded-[4.5rem] border-2 border-zinc-800 shadow-[0_30px_80px_rgba(0,0,0,0.9)] relative overflow-hidden text-center">
+              
+              {/* Security Header Banner */}
+              <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+              
+              <div className="max-w-4xl mx-auto space-y-8 relative z-10">
                 
-                <p className="text-zinc-500 font-bold uppercase mt-4">
-                  Verifique a taxa para receber o seu ganho.
+                {/* Emergency Notice Crest */}
+                <div className="flex flex-col items-center gap-2">
+                  <span className="bg-red-600/10 text-angola-red border border-red-500/20 px-6 py-2.5 rounded-full font-black uppercase text-xs tracking-[0.2em] animate-pulse flex items-center gap-2 shadow-sm">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                    </span>
+                    SISTEMA CERTIFICADO BNA • PROTOCOLO ANTI-FRAUDE
+                  </span>
+                  
+                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white italic uppercase tracking-tighter drop-shadow-md">
+                    RESERVA DE FUNDOS SOLICITADA
+                  </h2>
+                </div>
+
+                {/* Sub-text instructional caption */}
+                <div className="bg-zinc-950/60 p-3 sm:p-4 border border-zinc-800 rounded-2xl sm:rounded-3xl text-xs sm:text-sm leading-relaxed text-zinc-300 font-bold max-w-2xl mx-auto">
+                  📺 <span className="text-angola-yellow uppercase font-black tracking-wide">Vídeo Informativo Obrigatório:</span> Assista ao vídeo de instrução abaixo para entender exatamente como concluir a liberação com segurança e evitar bloqueios na sua conta bancária.
+                </div>
+
+                {/* Immersive Grid for Video Player and Real-Time Chat Feed */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                  
+                  {/* Left/Main Column: Video Streaming Center (Takes 2 blocks on desktop) */}
+                  <div className="lg:col-span-2 bg-black border-2 sm:border-4 border-zinc-800 rounded-3xl sm:rounded-[2.5rem] p-2 sm:p-3 shadow-2xl relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
+                    
+                    {/* Live Badge Capsule Overlay */}
+                    <div className="absolute top-6 left-6 z-20 flex items-center gap-2">
+                      <span className="bg-red-600 text-white font-black text-[10px] px-3.5 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1.5 shadow-[0_0_15px_rgba(227,27,35,0.6)] animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-white"></span>
+                        AO VIVO
+                      </span>
+                      <span className="bg-black/80 backdrop-blur-md text-[10px] font-black text-zinc-300 px-3.5 py-1.5 rounded-full border border-zinc-800 tracking-wide flex items-center gap-1.5 shadow-md">
+                        👥 <span className="text-angola-yellow font-bold">{spectatorCount.toLocaleString('pt-AO')}</span> assistindo agora
+                      </span>
+                    </div>
+
+                    {/* Highly Compelling Video Frame Area */}
+                    <div className="aspect-[9/16] w-full max-w-[350px] mx-auto rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-900 relative">
+                      <iframe 
+                        id="ifr_6a10e2ddd3c9558880ea8313" 
+                        title="Vídeo de desbloqueio" 
+                        src="https://scripts.converteai.net/c225a123-d2c0-49df-be35-4415d67db0bc/players/6a10e2ddd3c9558880ea8313/v4/embed.html?&amp;vl=https%3A%2F%2Fkizubamind.vercel.app%2Fativacao" 
+                        className="absolute left-0 top-0 h-full w-full border-0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowFullScreen={true} 
+                        loading="eager" 
+                        referrerPolicy="origin"
+                      ></iframe>
+                      
+                      {/* Audio mute notice / Real-time stamp overlay */}
+                      <div className="absolute bottom-4 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-[9px] font-mono text-zinc-400 border border-zinc-800">
+                        HD 1080p • TAXA EM TRANSMISSÃO AUTOMÁTICA
+                      </div>
+                    </div>
+
+                    {/* Simulated stream telemetry bar */}
+                    <div className="mt-3 px-3 flex justify-between items-center text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></span>
+                        Transmissão Estabilizada SPTR
+                      </span>
+                      <span className="text-zinc-400">Canal Educacional Regulado</span>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Real-Time Ganhadores Chating module */}
+                  <div className="bg-zinc-950 border-2 border-zinc-800 rounded-[2.5rem] p-5 flex flex-col justify-between shadow-inner text-left">
+                    <div className="border-b border-zinc-900 pb-3 mb-3 flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                        CHAT DO LEVANTAMENTO
+                      </span>
+                      <span className="text-[8px] bg-zinc-900 text-zinc-500 px-2 py-0.5 rounded-full font-bold">MODERADO</span>
+                    </div>
+
+                    {/* Chat messages feed */}
+                    <div className="flex-1 space-y-3 overflow-y-auto max-h-[160px] lg:max-h-[220px] font-mono pr-1 custom-chat-scrollbar">
+                      {chatMessages.map((m) => (
+                        <div key={m.id} className="text-[10px] leading-relaxed bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-900 hover:border-zinc-800 transition-colors animate-zoom-in">
+                          <span className="font-black text-angola-yellow text-[11px] block">{m.name}</span>
+                          <span className="text-zinc-300 font-medium block mt-0.5">{m.text}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Chat input footer block (disabled/placeholder) */}
+                    <div className="mt-4 pt-3 border-t border-zinc-900">
+                      <div className="w-full bg-zinc-900 rounded-xl p-2.5 text-[9px] font-bold text-zinc-600 uppercase text-center border border-zinc-800">
+                        🔒 Apenas participantes autorizados podem comentar
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Substantive Payout Block displaying dynamic balance to withdraw */}
+                <div className="bg-zinc-950 p-4 sm:p-6 rounded-2xl sm:rounded-[2.5rem] border border-zinc-800 max-w-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                  <div className="text-left">
+                    <p className="text-zinc-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center sm:text-left">Saldo Reservado Aguardando Libertação</p>
+                    <p className="text-2xl sm:text-3xl font-black text-angola-yellow italic tracking-tight text-center sm:text-left">{stats.accumulatedKz.toLocaleString('pt-AO')} Kz</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-zinc-500 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center sm:text-right">Enquadramento Legal</p>
+                    <p className="text-xs text-green-500 font-bold text-center sm:text-right">Livre de Impostos adicionais (Isento)</p>
+                  </div>
+                </div>
+
+                {/* Core Anti-Fraud CTA Box */}
+                <div className="space-y-6 max-w-2xl mx-auto">
+                  
+                  <div className="space-y-4">
+                    <button 
+                      onClick={() => window.open('https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80', '_blank')}
+                      className="w-full py-5 sm:py-8 bg-gradient-to-r from-angola-red via-red-600 to-angola-red hover:from-red-600 hover:to-red-700 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_12px_45px_rgba(227,27,35,0.5)] border-b-4 sm:border-b-8 border-red-900 hover:scale-105 active:scale-95 duration-100 transition-all select-none cursor-pointer animate-pulse flex items-center justify-center gap-2 sm:gap-3"
+                    >
+                      <span>PAGAR TAXA ANTI-FRAUDE & SACAR TUDO</span>
+                      <span className="text-3xl animate-bounce">💸</span>
+                    </button>
+                    
+                    <p className="text-zinc-400 font-extrabold uppercase text-xs tracking-widest">
+                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">5.000 Kz (Isenção Fiscal AGT/BNA)</span>
+                    </p>
+                  </div>
+
+                  {/* Flow control utilities */}
+                  <div className="flex flex-col md:flex-row gap-4 pt-4 border-t border-zinc-800/60">
+                    <button 
+                      onClick={() => setGameState(GameState.WITHDRAW_CONFIRM)} 
+                      className="flex-1 py-5 bg-zinc-950 hover:bg-zinc-900 border-2 border-zinc-800 text-zinc-400 font-black rounded-3xl uppercase text-[10px] tracking-wider select-none cursor-pointer hover:border-zinc-700 transition-all"
+                    >
+                      🔙 Voltar ao Comprovante de Saque
+                    </button>
+                    <button 
+                      onClick={() => setGameState(GameState.HOME)} 
+                      className="flex-1 py-5 bg-zinc-950 hover:bg-zinc-900 border-2 border-zinc-800 text-zinc-500 font-black rounded-3xl uppercase text-[10px] tracking-wider select-none cursor-pointer hover:border-zinc-700 transition-all"
+                    >
+                      🏡 Menu Principal SOU ANGOLANO
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Fine Legal compliance lines */}
+                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-tight leading-normal">
+                  * Em conformidade total com os regimes cambiais angolanos regulados pela Administração Geral Tributária (AGT) e BNA. O atraso na liquidação da taxa poderá resultar no estorno automático da sua recompensa ao tesouro cultural.
                 </p>
 
-                <div className="flex flex-col md:flex-row gap-4 mt-8">
-                   <button onClick={() => setGameState(GameState.WITHDRAW_CONFIRM)} className="flex-1 py-5 bg-zinc-900 text-zinc-400 font-black rounded-3xl uppercase text-[10px] border-2 border-zinc-800">Voltar ao Comprovante</button>
-                   <button onClick={() => setGameState(GameState.HOME)} className="flex-1 py-5 bg-zinc-900 text-zinc-600 font-black rounded-3xl uppercase text-[10px] border-2 border-zinc-800">Menu Principal</button>
-                </div>
               </div>
 
-              <p className="text-[10px] text-zinc-600 font-bold uppercase mt-8 tracking-tighter">
-                * Conforme previsto nos termos de uso e leis de combate ao branqueamento de capitais.
-              </p>
             </div>
           </div>
         )}
