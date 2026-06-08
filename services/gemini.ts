@@ -239,10 +239,10 @@ export const generateQuizQuestions = async (difficulty: Difficulty): Promise<Qui
   // Isso remove completamente o ecrã de carregamento moroso, mantendo o jogo fluido e divertido!
   try {
     const shuffled = [...FALLBACK_QUESTIONS].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 15);
+    return shuffled.slice(0, 10);
   } catch (e) {
     console.warn("Could not load randomized questions, using raw array:", e);
-    return FALLBACK_QUESTIONS.slice(0, 15);
+    return FALLBACK_QUESTIONS.slice(0, 10);
   }
 };
 

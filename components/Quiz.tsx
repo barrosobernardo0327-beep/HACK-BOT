@@ -24,7 +24,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
   const [loadingPhrase, setLoadingPhrase] = useState("A ligar ao servidor de recompensas angolano...");
 
   // Novos Estados Gamificados Super Premium
-  const [answersHistory, setAnswersHistory] = useState<('correct' | 'wrong' | 'pending')[]>(Array(15).fill('pending'));
+  const [answersHistory, setAnswersHistory] = useState<('correct' | 'wrong' | 'pending')[]>(Array(10).fill('pending'));
   const [streak, setStreak] = useState(0);
   const [spectatorsCount, setSpectatorsCount] = useState(1480);
   const [currentComment, setCurrentComment] = useState("A torcida angolana está ligada! Mostra o teu valor! 🇦🇴");
@@ -86,8 +86,8 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
 
     const phrases = [
       { max: 20, text: "A ligar ao servidor de recompensas angolano..." },
-      { max: 40, text: "A carregar 15 perguntas de cultura e tradição..." },
-      { max: 60, text: "A preparar saldo de 11.000 Kz por resposta certa..." },
+      { max: 40, text: "A carregar 10 perguntas de cultura e tradição..." },
+      { max: 60, text: "A preparar saldo de 15.000 Kz por resposta certa..." },
       { max: 80, text: "A verificar autenticidade das chaves fiscais..." },
       { max: 100, text: "Sincronização concluída! A iniciar o Quiz..." }
     ];
@@ -110,7 +110,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
     ]);
 
     clearInterval(progressInterval);
-    setQuestions(data.slice(0, 15));
+    setQuestions(data.slice(0, 10));
     setIsLoading(false);
     startTimer();
   };
@@ -143,7 +143,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
     
     if (isCorrect) {
       playSound('win');
-      const gain = 11000; // 11.000 Kz por quiz correto
+      const gain = 15000; // 15.000 Kz por quiz correto
       setAccumulatedKz(p => p + gain);
       setCorrectAnswersCount(p => p + 1);
       
@@ -154,14 +154,14 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       setSpectatorsCount(s => s + Math.floor(Math.random() * 320 + 150));
       
       if (newStreak >= 2) {
-        addFloatingText(`🔥 COMBO ${newStreak}x! +11.000 Kz`, "text-yellow-400 font-extrabold");
+        addFloatingText(`🔥 COMBO ${newStreak}x! +15.000 Kz`, "text-yellow-400 font-extrabold");
       } else {
-        addFloatingText(`+11.000 Kz`, "text-green-500 font-black");
+        addFloatingText(`+15.000 Kz`, "text-green-500 font-black");
       }
 
       const correctPhrases = [
         "Mário Manuel: QUE CRAQUE! Conhece mesmo a nossa terra! 🔥",
-        "Gervásio: É isso kamba! +11.000 Kz directo para o bolso!",
+        "Gervásio: É isso kamba! +15.000 Kz directo para o bolso!",
         "Sílvia Neto: Sou Angolano com muito orgulho! Cabeça cheia! 🤩",
         "Caxito_Boy: Essa foi brincadeira de crianças para quem estuda!",
         "Tandala: Ele sabe tudo kkk, lenda viva coroada! 👑",
@@ -289,7 +289,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
           <div className="flex gap-3">
             <div className="flex flex-col">
               <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Questão</span>
-              <div className="text-lg font-black">{currentIndex + 1}<span className="text-zinc-600">/15</span></div>
+              <div className="text-lg font-black">{currentIndex + 1}<span className="text-zinc-600">/10</span></div>
             </div>
             <div className="flex flex-col border-l border-zinc-800 pl-3">
               <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">Acertos</span>
@@ -336,7 +336,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
           <span>MAPA DE PROGRESSÃO AO PRÉMIO MÁXIMO</span>
           <span className="text-angola-yellow">Rumo aos 150.000 Kz</span>
         </div>
-        <div className="grid grid-cols-5 sm:grid-cols-15 gap-1 md:gap-1.5">
+        <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 md:gap-1.5">
           {answersHistory.map((status, index) => {
             let innerContent = String(index + 1);
             let cssClass = "bg-zinc-900 border-zinc-800 text-zinc-500";
@@ -372,7 +372,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
             {questions[currentIndex].category}
           </span>
           <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">
-            VALOR: 11.000 Kz
+            VALOR: 15.000 Kz
           </span>
         </div>
 
@@ -422,7 +422,7 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
                 <div className="space-y-2">
                   <div className="text-7xl mb-4">🏆</div>
                   <h3 className="text-green-500 text-4xl sm:text-5xl font-black italic uppercase tracking-tighter">CORRECTO!</h3>
-                  <p className="text-white font-black text-xl sm:text-2xl mt-1">+11.000 Kz Adicionados ao Balanço</p>
+                  <p className="text-white font-black text-xl sm:text-2xl mt-1">+15.000 Kz Adicionados ao Balanço</p>
                 </div>
               ) : (
                 <div className="space-y-4">
