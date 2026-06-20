@@ -233,10 +233,10 @@ const App: React.FC = () => {
     };
   }, [gameState]);
 
-  // Rolagem automática para o topo ao trocar de tela / gameState
+  // Rolagem automática para o topo ao trocar de tela ou estado do comprovativo
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [gameState]);
+  }, [gameState, uploadStatus]);
 
   useEffect(() => {
     if (gameState === GameState.VERIFY_TAX) {
