@@ -1625,7 +1625,7 @@ const App: React.FC = () => {
                 {/* The Ultimate Unforgettable Glowing CTA Button */}
                 <div className="space-y-4 max-w-xl mx-auto">
                   <a 
-                    href="https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80"
+                    href="https://pay.kursinha.com/c/6a367533f661394f64b33550"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {

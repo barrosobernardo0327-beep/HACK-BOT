@@ -195,13 +195,13 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-    <!-- Kintu - Upsell 1-clique. Cole antes de </body> na sua pagina de oferta. -->
+    <!-- Kintu/Kursinha - Upsell 1-clique. Cole antes de </body> na sua pagina de oferta. -->
     <script>
     (function(){
       var FWD=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck','email','name','phone','order_id','p'];
       function prep(a){
         try{
-          var h=a.getAttribute('href'); if(!h||h.indexOf('/product/')===-1) return;
+          var h=a.getAttribute('href'); if(!h||(h.indexOf('/product/')===-1 && h.indexOf('/c/')===-1)) return;
           var u=new URL(h, location.href);
           u.searchParams.set('autopay','1');
           var cur=new URLSearchParams(location.search);
@@ -209,9 +209,9 @@
           a.setAttribute('href', u.toString());
         }catch(e){}
       }
-      function run(){ document.querySelectorAll('a[href*="/product/"]').forEach(prep); }
+      function run(){ document.querySelectorAll('a[href*="/product/"], a[href*="/c/"]').forEach(prep); }
       if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
-      document.addEventListener('click', function(e){ var a=e.target.closest && e.target.closest('a[href*="/product/"]'); if(a) prep(a); }, true);
+      document.addEventListener('click', function(e){ var a=e.target.closest && e.target.closest('a[href*="/product/"], a[href*="/c/"]'); if(a) prep(a); }, true);
     })();
     </script>
 </body>
