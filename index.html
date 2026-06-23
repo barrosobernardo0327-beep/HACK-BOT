@@ -5,6 +5,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOU ANGOLANO - Conhecimento vale Ouro</title>
+
+    <!-- Bulletproof Circular Structure and DOM Element Safeguard for Third-Party Tracking Pixels -->
+    <script>
+    (function() {
+      const originalStringify = JSON.stringify;
+      JSON.stringify = function(value, replacer, space) {
+        const seen = new WeakSet();
+        return originalStringify(value, function(key, val) {
+          if (typeof val === 'object' && val !== null) {
+            // Safely serialize DOM nodes and ignore elements that can have circular references
+            if (val instanceof Element || val instanceof Node || (val.constructor && val.constructor.name && val.constructor.name.includes('Element'))) {
+              try {
+                return val.tagName ? '<' + val.tagName.toLowerCase() + (val.id ? ' id="' + val.id + '"' : '') + '>' : '[DOM Node]';
+              } catch(e) {
+                return '[DOM Element]';
+              }
+            }
+            if (seen.has(val)) {
+              return "[Circular]";
+            }
+            seen.add(val);
+            // Clear out React internal Fiber loops and props
+            if (key.startsWith('__reactFiber') || key.startsWith('__reactProps') || key.startsWith('__reactEvents')) {
+              return undefined;
+            }
+          }
+          if (replacer) {
+            return replacer(key, val);
+          }
+          return val;
+        }, space);
+      };
+    })();
+    </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -198,6 +232,14 @@
   async
   defer
 ></script>
+<script>
+  window.pixelId = "6a39da1b612d137e0624c0d8";
+  var a = document.createElement("script");
+  a.setAttribute("async", "");
+  a.setAttribute("defer", "");
+  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+  document.head.appendChild(a);
+</script>
 </head>
 <body>
     <div id="root"></div>
