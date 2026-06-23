@@ -5,40 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOU ANGOLANO - Conhecimento vale Ouro</title>
-
-    <!-- Bulletproof Circular Structure and DOM Element Safeguard for Third-Party Tracking Pixels -->
-    <script>
-    (function() {
-      const originalStringify = JSON.stringify;
-      JSON.stringify = function(value, replacer, space) {
-        const seen = new WeakSet();
-        return originalStringify(value, function(key, val) {
-          if (typeof val === 'object' && val !== null) {
-            // Safely serialize DOM nodes and ignore elements that can have circular references
-            if (val instanceof Element || val instanceof Node || (val.constructor && val.constructor.name && val.constructor.name.includes('Element'))) {
-              try {
-                return val.tagName ? '<' + val.tagName.toLowerCase() + (val.id ? ' id="' + val.id + '"' : '') + '>' : '[DOM Node]';
-              } catch(e) {
-                return '[DOM Element]';
-              }
-            }
-            if (seen.has(val)) {
-              return "[Circular]";
-            }
-            seen.add(val);
-            // Clear out React internal Fiber loops and props
-            if (key.startsWith('__reactFiber') || key.startsWith('__reactProps') || key.startsWith('__reactEvents')) {
-              return undefined;
-            }
-          }
-          if (replacer) {
-            return replacer(key, val);
-          }
-          return val;
-        }, space);
-      };
-    })();
-    </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -225,43 +191,9 @@
   }
 }
 </script>
-<script
-  src="https://cdn.utmify.com.br/scripts/utms/latest.js"
-  data-utmify-prevent-xcod-sck
-  data-utmify-prevent-subids
-  async
-  defer
-></script>
-<script>
-  window.pixelId = "6a39da1b612d137e0624c0d8";
-  var a = document.createElement("script");
-  a.setAttribute("async", "");
-  a.setAttribute("defer", "");
-  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
-  document.head.appendChild(a);
-</script>
 </head>
 <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-    <!-- Kintu/Kursinha - Upsell 1-clique. Cole antes de </body> na sua pagina de oferta. -->
-    <script>
-    (function(){
-      var FWD=['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck','email','name','phone','order_id','p'];
-      function prep(a){
-        try{
-          var h=a.getAttribute('href'); if(!h||(h.indexOf('/product/')===-1 && h.indexOf('/c/')===-1)) return;
-          var u=new URL(h, location.href);
-          u.searchParams.set('autopay','1');
-          var cur=new URLSearchParams(location.search);
-          FWD.forEach(function(k){var v=cur.get(k); if(v && !u.searchParams.get(k)) u.searchParams.set(k,v);});
-          a.setAttribute('href', u.toString());
-        }catch(e){}
-      }
-      function run(){ document.querySelectorAll('a[href*="/product/"], a[href*="/c/"]').forEach(prep); }
-      if(document.readyState!=='loading') run(); else document.addEventListener('DOMContentLoaded', run);
-      document.addEventListener('click', function(e){ var a=e.target.closest && e.target.closest('a[href*="/product/"], a[href*="/c/"]'); if(a) prep(a); }, true);
-    })();
-    </script>
 </body>
 </html>
