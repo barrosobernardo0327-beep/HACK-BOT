@@ -637,6 +637,7 @@ const App: React.FC = () => {
                         const gain = ctx.createGain();
                         osc.connect(gain);
                         gain.connect(ctx.destination);
+                        
                         osc.type = 'sawtooth';
                         osc.frequency.setValueAtTime(220, ctx.currentTime);
                         osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
