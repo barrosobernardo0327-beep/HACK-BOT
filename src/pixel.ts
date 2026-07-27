@@ -141,7 +141,7 @@ export function trackPixelEvent(eventName: string, params?: Record<string, any>,
  */
 
 // Triggered when user enters Checkout page with payment instructions
-export function trackInitiateCheckout(amount: number = 3950): void {
+export function trackInitiateCheckout(amount: number = 5000): void {
   trackPixelEvent('InitiateCheckout', {
     value: amount,
     currency: 'AOA',
@@ -159,7 +159,7 @@ export function trackAddPaymentInfo(): void {
 }
 
 // Triggered when the transaction validation is successfully concluded and the system shows "CONTA CONGELADA BNA" (the ultimate target screen)
-export function trackPurchase(amount: number = 3950): void {
+export function trackPurchase(amount: number = 5000): void {
   trackPixelEvent('Purchase', {
     value: amount,
     currency: 'AOA',
