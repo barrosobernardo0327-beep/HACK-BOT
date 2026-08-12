@@ -233,10 +233,28 @@ const App: React.FC = () => {
     };
   }, [gameState]);
 
-  // Rolagem automática para o topo ao trocar de tela / gameState
+  // Rolagem automática para o topo ao trocar de tela / gameState ou clicar em botões
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
   }, [gameState]);
+
+  useEffect(() => {
+    const handleButtonClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const btn = target.closest('button, a, [role="button"], .btn-ganho, .opcao-deposito');
+      if (btn) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('click', handleButtonClick, { capture: true });
+    return () => window.removeEventListener('click', handleButtonClick, { capture: true });
+  }, []);
 
   useEffect(() => {
     if (gameState === GameState.VERIFY_TAX) {

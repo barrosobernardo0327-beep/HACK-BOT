@@ -31,10 +31,12 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
 
   const timerRef = useRef<any>(null);
 
-  // Rolagem automática para o topo ao avançar perguntas ou carregar
+  // Rolagem automática para o topo ao avançar perguntas, abrir feedback ou carregar
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [currentIndex, isLoading]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentIndex, isLoading, showFeedback]);
 
   // Sistema de som sintetizado para impacto
   const playSound = (type: 'win' | 'loss') => {
