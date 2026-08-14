@@ -708,7 +708,7 @@ const App: React.FC = () => {
             RECOMPENSAS EXCLUSIVAS CULTURAIS
           </div>
           
-          <div className="aspect-video w-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black border border-zinc-800 relative group-hover:scale-[1.01] transition-transform duration-500">
+          <div className="w-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black border border-zinc-800 relative group-hover:scale-[1.01] transition-transform duration-500">
             <GumletPlayer />
           </div>
           
