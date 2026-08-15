@@ -6,6 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOU ANGOLANO - Conhecimento vale Ouro</title>
     
+    <script>
+      (function() {
+        var originalStringify = JSON.stringify;
+        JSON.stringify = function(value, replacer, space) {
+          var seen = new WeakSet();
+          function safeReplacer(key, val) {
+            if (typeof val === "object" && val !== null) {
+              if (typeof Node !== "undefined" && val instanceof Node) {
+                return {
+                  tagName: val.tagName,
+                  id: val.id,
+                  className: val.className
+                };
+              }
+              if (key && (key.startsWith("__reactFiber") || key.startsWith("__reactProps") || key.startsWith("__reactEvents") || key === "stateNode" || key === "return" || key === "child" || key === "sibling")) {
+                return undefined;
+              }
+              if (seen.has(val)) {
+                return "[Circular]";
+              }
+              seen.add(val);
+            }
+            if (typeof replacer === "function") {
+              return replacer.call(this, key, val);
+            }
+            return val;
+          }
+          try {
+            if (Array.isArray(replacer)) {
+              return originalStringify(value, replacer, space);
+            }
+            return originalStringify(value, safeReplacer, space);
+          } catch (e) {
+            try {
+              return originalStringify(value, safeReplacer, space);
+            } catch (err) {
+              return "{}";
+            }
+          }
+        };
+      })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {

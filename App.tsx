@@ -1643,7 +1643,7 @@ const App: React.FC = () => {
                 {/* The Ultimate Unforgettable Glowing CTA Button */}
                 <div className="space-y-4 max-w-xl mx-auto">
                   <a 
-                    href="https://www.kintu.org/product/2aeff560-f13b-4814-9305-cba3f58e2a80"
+                    href="https://standerpay.com/checkout/5b4e62da-be70-441c-ada2-cf5804cdf807"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
