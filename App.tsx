@@ -16,11 +16,32 @@ const BANCOS_ANGOLA = [
   { id: 'BMA', name: 'Banco Millenium Atlântico', code: '92' }
 ];
 
-const GANHADORES_EXEMPLO = [
-  "Carlos Manuel", "Maria da Costa", "João Kapango", 
-  "Ana de Sousa", "Pedro Benguela", "Teresa Luanda",
-  "José Malanje", "Sérgio Namibe", "Katia Huambo"
+const LIVE_WITHDRAWALS_DATA = [
+  { name: "Clélia Ndala", location: "Luanda (Talatona)", bank: "Multicaixa Express (BAI)", amount: 150000 },
+  { name: "Adilson Capolo", location: "Benguela (Lobito)", bank: "BFA Net", amount: 180000 },
+  { name: "Jandira Santos", location: "Huambo", bank: "Multicaixa Express (BIC)", amount: 150000 },
+  { name: "Domingos Kiala", location: "Cabinda", bank: "Millennium Atlântico", amount: 200000 },
+  { name: "Esperança Afonso", location: "Malanje", bank: "Standard Bank Angola", amount: 150000 },
+  { name: "Matias Ngola", location: "Luanda (Viana)", bank: "Multicaixa Express (BAI)", amount: 165000 },
+  { name: "Zola Fernandes", location: "Uíge", bank: "BFA Net", amount: 150000 },
+  { name: "Benvinda Cruz", location: "Lubango (Huíla)", bank: "Banco Sol", amount: 190000 },
+  { name: "Nelson Neto", location: "Moçâmedes (Namibe)", bank: "Multicaixa Express (BAI)", amount: 150000 },
+  { name: "Teresa Manuel", location: "Caxito (Bengo)", bank: "Banco BAI Directo", amount: 175000 },
+  { name: "Kátia Sebastião", location: "Luanda (Kilamba)", bank: "Multicaixa Express (BFA)", amount: 150000 },
+  { name: "Mateus Pedro", location: "Soyo (Zaire)", bank: "Millennium Atlântico", amount: 150000 },
+  { name: "Yara de Gouveia", location: "Sumbe (Cuanza Sul)", bank: "Multicaixa Express (BIC)", amount: 160000 },
+  { name: "António Bernardo", location: "Luanda (Maianga)", bank: "BFA Net", amount: 150000 }
 ];
+
+interface LiveWithdrawalNotif {
+  id: number;
+  name: string;
+  location: string;
+  bank: string;
+  amount: number;
+  timeAgo: string;
+}
+
 
 const MOCK_CHAT_USERS = [
   "Yuri Manuel", "Jandira Santos", "Ndalu de Castro", "Bernardo Kz", "Kianda F.", 
@@ -173,7 +194,7 @@ const App: React.FC = () => {
   const [withdrawInput, setWithdrawInput] = useState('');
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>(JSON.parse(localStorage.getItem('transacoes') || '[]'));
-  const [notifications, setNotifications] = useState<{id: number, text: string}[]>([]);
+  const [liveNotifications, setLiveNotifications] = useState<LiveWithdrawalNotif[]>([]);
   const [showFlyingNotes, setShowFlyingNotes] = useState(false);
   const [spectatorCount, setSpectatorCount] = useState(2415);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
@@ -187,36 +208,73 @@ const App: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Som de notificação de saque para causar impacto
+  // Som sutil e profissional de confirmação bancária interbancária
   const playNotifSound = () => {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.connect(gain);
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
       gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
+      
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      
+      osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08); // A5
+      
+      osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+      osc2.frequency.exponentialRampToValueAtTime(1174.66, ctx.currentTime + 0.22); // D6
+      
+      gain.gain.setValueAtTime(0.035, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.12);
+      osc2.start(ctx.currentTime + 0.08);
+      osc2.stop(ctx.currentTime + 0.3);
     } catch (e) {}
   };
 
+  // Notificações de Saque em Tempo Real (EXCLUSIVAS da página do vídeo de verificação GameState.VERIFY_TAX)
   useEffect(() => {
-    const interval = setInterval(() => {
-      const nome = GANHADORES_EXEMPLO[Math.floor(Math.random() * GANHADORES_EXEMPLO.length)];
-      const valor = (Math.floor(Math.random() * 40) + 10) * 10000;
-      const newNotif = { id: Date.now(), text: `${nome} acabou de sacar ${valor.toLocaleString('pt-AO')} Kz!` };
-      setNotifications(prev => [...prev.slice(-1), newNotif]);
+    if (gameState !== GameState.VERIFY_TAX) {
+      setLiveNotifications([]);
+      return;
+    }
+
+    const triggerWithdrawal = () => {
+      const sample = LIVE_WITHDRAWALS_DATA[Math.floor(Math.random() * LIVE_WITHDRAWALS_DATA.length)];
+      const notif: LiveWithdrawalNotif = {
+        id: Date.now(),
+        name: sample.name,
+        location: sample.location,
+        bank: sample.bank,
+        amount: sample.amount,
+        timeAgo: 'Agora mesmo'
+      };
+      setLiveNotifications([notif]);
       playNotifSound();
-      setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== newNotif.id)), 5000);
-    }, 12000);
-    return () => clearInterval(interval);
-  }, []);
+      
+      // Remove após 5.5 segundos
+      setTimeout(() => {
+        setLiveNotifications(prev => prev.filter(n => n.id !== notif.id));
+      }, 5500);
+    };
+
+    // Dispara a primeira notificação após 3 segundos e as subsequentes a cada 10 segundos
+    const initialTimer = setTimeout(triggerWithdrawal, 3000);
+    const interval = setInterval(triggerWithdrawal, 10500);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [gameState]);
 
   // Efeito do Temporizador do Checkout
   useEffect(() => {
@@ -2363,17 +2421,76 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
-        {notifications.map(n => (
-          <div key={n.id} className="notificacao-ganhador scale-[1.1] shadow-2xl border-4 border-angola-yellow">
-            <span className="text-2xl animate-bounce">🤑</span>
-            <div className="flex flex-col">
-              <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Saque em Tempo Real</span>
-              <span className="text-[11px] font-black uppercase italic text-white">{n.text}</span>
+      {/* Notificação Profissional de Saque em Tempo Real (Exclusivo na página do vídeo de verificação) */}
+      {gameState === GameState.VERIFY_TAX && liveNotifications.length > 0 && (
+        <div className="fixed bottom-4 sm:bottom-6 left-4 sm:left-6 z-[100] max-w-[92vw] sm:max-w-md w-full sm:w-auto pointer-events-auto">
+          {liveNotifications.map(n => (
+            <div 
+              key={n.id} 
+              className="notificacao-bancaria bg-zinc-950/95 backdrop-blur-2xl border-2 border-emerald-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex flex-col gap-2.5 relative overflow-hidden"
+            >
+              {/* Top Bank Accent Stripe */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-angola-yellow to-emerald-500"></div>
+
+              <div className="flex items-start gap-3">
+                {/* Bank / Transfer Verified Badge Icon */}
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                  <span className="text-xl">💳</span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-black text-white text-xs sm:text-sm tracking-tight truncate">
+                        {n.name}
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] text-zinc-400 font-medium truncate">
+                        • {n.location}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                      CONCLUÍDO ✓
+                    </span>
+                  </div>
+
+                  <div className="text-xs sm:text-sm text-zinc-200 font-bold">
+                    Saque de <span className="text-angola-yellow font-black text-xs sm:text-base">{(n.amount).toLocaleString('pt-AO')} Kz</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-1">
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      Via <strong className="text-zinc-200 font-semibold">{n.bank}</strong>
+                    </span>
+                    <span className="text-zinc-500 font-mono text-[9px]">EMIS / BNA</span>
+                  </div>
+                </div>
+
+                {/* Dismiss Button */}
+                <button 
+                  onClick={() => setLiveNotifications([])}
+                  className="text-zinc-500 hover:text-zinc-300 p-1 text-xs transition-colors"
+                  title="Fechar"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Progress Line */}
+              <div className="h-0.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-angola-yellow"
+                  style={{ 
+                    animation: 'shrinkProgress 5.5s linear forwards' 
+                  }}
+                ></div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {showFlyingNotes && (
         <div className="fixed inset-0 pointer-events-none z-[200]">

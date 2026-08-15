@@ -138,21 +138,16 @@
             pointer-events: none;
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes slideUpFade {
+            from { transform: translateY(20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        .notificacao-ganhador {
-            animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            background: #111;
-            border-left: 4px solid var(--angola-yellow);
-            padding: 12px 20px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        @keyframes shrinkProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        .notificacao-bancaria {
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes moneyFall {
