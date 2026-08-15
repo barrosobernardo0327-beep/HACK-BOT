@@ -1,15 +1,16 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { generateQuizQuestions } from '../services/gemini';
 import { QuizQuestion, Difficulty } from '../types';
+import { User as UserIcon, Scissors, FastForward, Check, X, Award, Lightbulb } from 'lucide-react';
 
 interface QuizProps {
+  userName?: string;
   onComplete: (score: number, correctCount: number, kz: number) => void;
   onQuit: () => void;
-  triggerNotification: () => void;
+  triggerNotification?: () => void;
 }
 
-export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
+export const Quiz: React.FC<QuizProps> = ({ userName = "Ffdd", onComplete, onQuit }) => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -19,15 +20,13 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
   const [accumulatedKz, setAccumulatedKz] = useState(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [wrongAnswersCount, setWrongAnswersCount] = useState(0);
-  const [floatingText, setFloatingText] = useState<{ id: number; text: string; color: string }[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingPhrase, setLoadingPhrase] = useState("A ligar ao servidor de recompensas angolano...");
 
-  // Novos Estados Gamificados Super Premium
-  const [answersHistory, setAnswersHistory] = useState<('correct' | 'wrong' | 'pending')[]>(Array(10).fill('pending'));
-  const [streak, setStreak] = useState(0);
-  const [spectatorsCount, setSpectatorsCount] = useState(1480);
-  const [currentComment, setCurrentComment] = useState("A torcida angolana está ligada! Mostra o teu valor! 🇦🇴");
+  // Power-ups (50/50 e Pular)
+  const [fiftyFiftyUses, setFiftyFiftyUses] = useState(2);
+  const [skipUses, setSkipUses] = useState(2);
+  const [hiddenOptions, setHiddenOptions] = useState<number[]>([]);
 
   const timerRef = useRef<any>(null);
 
@@ -38,10 +37,11 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
     document.body.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentIndex, isLoading, showFeedback]);
 
-  // Sistema de som sintetizado para impacto
-  const playSound = (type: 'win' | 'loss') => {
+  // Sistema de som sintetizado para feedback auditivo
+  const playSound = (type: 'win' | 'loss' | 'powerup') => {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -51,26 +51,26 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       if (type === 'win') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-        osc.frequency.linearRampToValueAtTime(783.99, ctx.currentTime + 0.1); // G5
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      } else {
+        osc.frequency.linearRampToValueAtTime(783.99, ctx.currentTime + 0.12); // G5
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      } else if (type === 'loss') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(220, ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.2);
+        osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      } else {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.2);
       }
 
       osc.start();
-      osc.stop(ctx.currentTime + 0.3);
+      osc.stop(ctx.currentTime + 0.35);
     } catch (e) {}
-  };
-
-  const addFloatingText = (text: string, color: string) => {
-    const id = Date.now();
-    setFloatingText(prev => [...prev, { id, text, color }]);
-    setTimeout(() => setFloatingText(p => p.filter(t => t.id !== id)), 1000);
   };
 
   const fetchQuestions = async () => {
@@ -78,19 +78,17 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
     setLoadingProgress(0);
     setLoadingPhrase("A ligar ao servidor de recompensas angolano...");
 
-    // Começar a gerar ou buscar as perguntas em paralelo
     const questionsPromise = generateQuizQuestions(Difficulty.INTERMEDIATE);
 
-    const totalTime = 5000; // Exatamente 5 segundos de processamento!
+    const totalTime = 4000;
     const intervalTime = 100;
-    const steps = totalTime / intervalTime; // 50 passos
+    const steps = totalTime / intervalTime;
     let currentStep = 0;
 
     const phrases = [
-      { max: 20, text: "A ligar ao servidor de recompensas angolano..." },
-      { max: 40, text: "A carregar 10 perguntas de cultura e tradição..." },
-      { max: 60, text: "A preparar saldo de 15.000 Kz por resposta certa..." },
-      { max: 80, text: "A verificar autenticidade das chaves fiscais..." },
+      { max: 25, text: "A ligar ao servidor de recompensas angolano..." },
+      { max: 50, text: "A carregar 10 perguntas de cultura e tradição..." },
+      { max: 75, text: "A preparar saldo de 15.000 Kz por resposta certa..." },
       { max: 100, text: "Sincronização concluída! A iniciar o Quiz..." }
     ];
 
@@ -105,7 +103,6 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       }
     }, intervalTime);
 
-    // Esperar simultaneamente pelo fim dos 5 segundos E o carregamento das perguntas
     const [data] = await Promise.all([
       questionsPromise,
       new Promise(resolve => setTimeout(resolve, totalTime))
@@ -120,18 +117,47 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setTimer(30);
-    // Periodicamente muda os espectadores levemente para dar dinamismo orgânico
     timerRef.current = setInterval(() => {
       setTimer(p => { 
         if (p <= 1) { 
           handleAnswer(-1); 
           return 0; 
         } 
-        // Flutuação orgânica do contador de pessoas a assistir
-        setSpectatorsCount(s => s + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 8 + 1));
         return p - 1; 
       });
     }, 1000);
+  };
+
+  // Ativação do Power-up 50/50
+  const handleFiftyFifty = () => {
+    if (fiftyFiftyUses <= 0 || selectedOption !== null || !questions[currentIndex]) return;
+    const currentQ = questions[currentIndex];
+    const incorrectIndices = currentQ.options
+      .map((_, i) => i)
+      .filter(i => i !== currentQ.correctAnswer);
+
+    // Seleciona 2 opções incorretas para ocultar
+    const shuffled = [...incorrectIndices].sort(() => 0.5 - Math.random());
+    const toHide = shuffled.slice(0, 2);
+    setHiddenOptions(toHide);
+    setFiftyFiftyUses(prev => prev - 1);
+    playSound('powerup');
+  };
+
+  // Ativação do Power-up Pular
+  const handleSkip = () => {
+    if (skipUses <= 0 || selectedOption !== null) return;
+    setSkipUses(prev => prev - 1);
+    playSound('powerup');
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedOption(null);
+      setShowFeedback(false);
+      setHiddenOptions([]);
+      startTimer();
+    } else {
+      onComplete(correctAnswersCount * 10, correctAnswersCount, accumulatedKz);
+    }
   };
 
   const handleAnswer = (idx: number) => {
@@ -148,54 +174,10 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       const gain = 15000; // 15.000 Kz por quiz correto
       setAccumulatedKz(p => p + gain);
       setCorrectAnswersCount(p => p + 1);
-      
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      
-      // Aumento substancial na audiência por sucesso consecutivo
-      setSpectatorsCount(s => s + Math.floor(Math.random() * 320 + 150));
-      
-      if (newStreak >= 2) {
-        addFloatingText(`🔥 COMBO ${newStreak}x! +15.000 Kz`, "text-yellow-400 font-extrabold");
-      } else {
-        addFloatingText(`+15.000 Kz`, "text-green-500 font-black");
-      }
-
-      const correctPhrases = [
-        "Mário Manuel: QUE CRAQUE! Conhece mesmo a nossa terra! 🔥",
-        "Gervásio: É isso kamba! +15.000 Kz directo para o bolso!",
-        "Sílvia Neto: Sou Angolano com muito orgulho! Cabeça cheia! 🤩",
-        "Caxito_Boy: Essa foi brincadeira de crianças para quem estuda!",
-        "Tandala: Ele sabe tudo kkk, lenda viva coroada! 👑",
-        "Yuri Capolo: Assim as férias de dezembro já estão totalmente pagas!",
-        "Ndala_Huambo: Sem hipóteses para a concorrência! Brilha mano! 🎉"
-      ];
-      setCurrentComment(correctPhrases[Math.floor(Math.random() * correctPhrases.length)]);
     } else {
       playSound('loss');
       setWrongAnswersCount(p => p + 1);
-      setStreak(0);
-      
-      // Perda de alguma audiência ao errar
-      setSpectatorsCount(s => Math.max(850, s - Math.floor(Math.random() * 190 + 90)));
-      addFloatingText("ERROU!", "text-angola-red font-black");
-
-      const incorrectPhrases = [
-        "Beto Lobito: Eiaaaa! Bloqueou de repente poxa! 😭",
-        "Clara Santos: Ah pá, vacilou logo no mais fácil!",
-        "Nara_Huambo: Não faz mal mano, foca na próxima pergunta! 🙏",
-        "Dinis C.: Kkkk a pressão do relógio faz tremer os dedos!",
-        "Zola: Uii k dor, essa eu sabia de cor no Semáforo!",
-        "Bernardo_Kz: Calma mano! Tu consegues recuperar nos próximos!"
-      ];
-      setCurrentComment(incorrectPhrases[Math.floor(Math.random() * incorrectPhrases.length)]);
     }
-
-    setAnswersHistory(prev => {
-      const copy = [...prev];
-      copy[currentIndex] = isCorrect ? 'correct' : 'wrong';
-      return copy;
-    });
 
     setShowFeedback(true);
   };
@@ -205,255 +187,434 @@ export const Quiz: React.FC<QuizProps> = ({ onComplete, onQuit }) => {
       setCurrentIndex(currentIndex + 1);
       setSelectedOption(null);
       setShowFeedback(false);
+      setHiddenOptions([]);
       startTimer();
-      
-      // Novo comentário instigante da audiência na transição da pergunta
-      const transitions = [
-        "Yara: Vamos à próxima! O campeonato está lindo!",
-        "Adilson: Mostra o que vale, a herança é nossa!",
-        "Salo Caxito: Quero ver qual é o próximo tema de Angola!",
-        "Nzinga: O tempo é curto, foca aí kamba!",
-        "Kiesse: Força herói! Estamos todos na torcida viva!"
-      ];
-      setCurrentComment(transitions[Math.floor(Math.random() * transitions.length)]);
     } else {
       onComplete(correctAnswersCount * 10, correctAnswersCount, accumulatedKz);
     }
   };
 
-  useEffect(() => { fetchQuestions(); return () => clearInterval(timerRef.current); }, []);
+  useEffect(() => { 
+    fetchQuestions(); 
+    return () => clearInterval(timerRef.current); 
+  }, []);
 
-  if (isLoading || questions.length === 0 || !questions[currentIndex]) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] max-w-xl mx-auto px-4 py-12 animate-zoom-in">
-      <div className="glass-card w-full p-8 md:p-12 rounded-[4rem] border-zinc-800 text-center shadow-2xl relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-angola-yellow rounded-full opacity-10 blur-2xl"></div>
-        
-        {/* Animated spinner */}
-        <div className="relative flex items-center justify-center w-24 h-24 mx-auto mb-8">
-          <div className="absolute inset-0 border-4 border-zinc-900 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-angola-yellow border-t-angola-red rounded-full animate-spin"></div>
-          <span className="text-3xl animate-bounce">🇦🇴</span>
-        </div>
-
-        {/* Processing badge */}
-        <span className="text-[10px] bg-red-600/10 text-angola-red border border-red-600/20 px-4 py-1 rounded-full font-black uppercase tracking-[0.2em] mb-4 inline-block animate-pulse">
-          A Processar...
-        </span>
-
-        {/* Title */}
-        <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-4">
-          PREPARANDO CAMPEONATO
-        </h3>
-
-        {/* Active Phrase */}
-        <p className="text-zinc-400 font-bold min-h-[48px] text-sm px-2 mb-8 leading-relaxed">
-          {loadingPhrase}
-        </p>
-
-        {/* Progress Bar Container */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs font-black uppercase tracking-wider text-zinc-500">
-            <span>Servidor Central</span>
-            <span className="text-angola-yellow">{loadingProgress}%</span>
+  // Tela de Carregamento
+  if (isLoading || questions.length === 0 || !questions[currentIndex]) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#4a0808] via-[#240404] to-[#0d0101] text-white flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md p-8 md:p-10 rounded-3xl bg-[#1c0505]/95 border border-[#3e0f0f] text-center shadow-2xl relative overflow-hidden">
+          {/* Top highlight bar */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 via-[#F8D308] to-red-600"></div>
+          
+          {/* Spinner */}
+          <div className="relative flex items-center justify-center w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-[#300a0a] rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-[#F8D308] border-t-red-600 rounded-full animate-spin"></div>
+            <span className="text-2xl">🇦🇴</span>
           </div>
-          <div className="h-4 w-full bg-zinc-950 rounded-full overflow-hidden p-1 border border-zinc-800">
-            <div 
-              className="h-full bg-gradient-to-r from-angola-red to-angola-yellow rounded-full transition-all duration-100 ease-out shadow-[0_0_10px_rgba(248,211,8,0.3)]"
-              style={{ width: `${loadingProgress}%` }}
-            ></div>
+
+          <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">
+            PREPARANDO QUIZ
+          </h3>
+
+          <p className="text-zinc-400 font-medium min-h-[44px] text-xs px-2 mb-6 leading-relaxed">
+            {loadingPhrase}
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
+              <span>Sincronizando</span>
+              <span className="text-[#F8D308]">{loadingProgress}%</span>
+            </div>
+            <div className="h-3 w-full bg-[#120303] rounded-full overflow-hidden p-0.5 border border-[#300a0a]">
+              <div 
+                className="h-full bg-gradient-to-r from-red-600 to-[#F8D308] rounded-full transition-all duration-100 ease-out shadow-[0_0_8px_rgba(248,211,8,0.4)]"
+                style={{ width: `${loadingProgress}%` }}
+              ></div>
+            </div>
           </div>
         </div>
-
-        {/* Extra notice */}
-        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mt-8 italic">
-          Ganho Máximo Possível: <span className="text-green-500 font-black">150.000 Kz</span>
-        </p>
       </div>
-    </div>
-  );
+    );
+  }
+
+  const currentQ = questions[currentIndex];
+  const progressPercent = Math.round(((currentIndex + 1) / questions.length) * 100);
+  const timerRadius = 32;
+  const timerCircumference = 2 * Math.PI * timerRadius;
+  const timerStrokeDashoffset = timerCircumference - (timer / 30) * timerCircumference;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-4 py-8 animate-fade-in relative">
-      {/* Floating Gain indicators */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[100]">
-        {floatingText.map(t => (
-          <div key={t.id} className={`text-5xl font-black uppercase italic animate-float-up ${t.color} drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]`}>
-            {t.text}
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#520909] via-[#240404] to-[#0a0101] text-white flex flex-col items-center justify-start p-4 sm:p-6 select-none relative overflow-hidden">
+      
+      {/* Background soft red ambient lighting */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[450px] h-[450px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Top sticky live dashboard bar */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-900/95 p-5 rounded-3xl border border-zinc-800 sticky top-4 z-30 shadow-2xl backdrop-blur-md">
-        <div className="flex items-center gap-4 justify-between w-full sm:w-auto">
-          <div className="flex gap-3">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Questão</span>
-              <div className="text-lg font-black">{currentIndex + 1}<span className="text-zinc-600">/10</span></div>
-            </div>
-            <div className="flex flex-col border-l border-zinc-800 pl-3">
-              <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">Acertos</span>
-              <div className="text-lg font-black text-green-500">{correctAnswersCount}</div>
-            </div>
-            <div className="flex flex-col border-l border-zinc-800 pl-3">
-              <span className="text-[9px] text-angola-red font-black uppercase tracking-widest">Erros</span>
-              <div className="text-lg font-black text-angola-red">{wrongAnswersCount}</div>
-            </div>
-          </div>
-
-          {/* Live broadcast stream simulation badge */}
-          <div className="bg-red-600/10 border border-red-600/30 px-3 py-1.5 rounded-full text-[9px] font-black text-white flex items-center gap-1.5 tracking-wider uppercase select-none shadow">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
-            <span>EM DIRETO • {spectatorsCount.toLocaleString()}</span>
-          </div>
-        </div>
+      <div className="w-full max-w-md mx-auto space-y-4 relative z-10">
         
-        {/* Animated Combo Streak indicator */}
-        <div className="flex flex-col items-center">
-          {streak >= 2 ? (
-            <div className="bg-gradient-to-r from-yellow-500 to-amber-600 px-3 py-1 rounded-full text-[9px] font-black text-black tracking-widest uppercase mb-1 flex items-center gap-1 shadow-lg animate-bounce">
-              🔥 COMBO x{streak}
+        {/* 1. TOP HEADER: User Info on Left & Pergunta Count on Right */}
+        <div className="flex items-center justify-between w-full pt-1 pb-1">
+          
+          {/* User info */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full border-2 border-[#d4af37]/80 bg-[#250808] flex items-center justify-center text-[#F8D308] shadow-md">
+              <UserIcon className="w-6 h-6 text-[#F8D308]" />
             </div>
-          ) : (
-            <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Saldo do Jogo</span>
-          )}
-          <div className="text-3xl font-black text-angola-yellow hover:scale-105 transition-transform drop-shadow-md leading-none">
-            {accumulatedKz.toLocaleString()} <span className="text-xs">Kz</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 justify-between w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-zinc-800 sm:border-t-0">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Tempo Limite</span>
-            <div className={`text-lg font-black ${timer < 10 ? 'text-angola-red animate-pulse scale-110' : 'text-white'}`}>{timer}s</div>
-          </div>
-        </div>
-      </div>
-
-      {/* QUESTION PROGRESS MAP (Horizontal Stepper of Pins representing 15 questions) */}
-      <div className="bg-zinc-950 p-4 rounded-3xl border border-zinc-900 shadow-inner">
-        <div className="text-[9px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-3 text-left pl-1 flex justify-between items-center">
-          <span>MAPA DE PROGRESSÃO AO PRÉMIO MÁXIMO</span>
-          <span className="text-angola-yellow">Rumo aos 150.000 Kz</span>
-        </div>
-        <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 md:gap-1.5">
-          {answersHistory.map((status, index) => {
-            let innerContent = String(index + 1);
-            let cssClass = "bg-zinc-900 border-zinc-800 text-zinc-500";
-            
-            if (index === currentIndex && status === 'pending') {
-              cssClass = "bg-yellow-500/20 border-angola-yellow text-angola-yellow font-extrabold shadow-md ring-2 ring-angola-yellow/40 animate-pulse";
-              innerContent = "★";
-            } else if (status === 'correct') {
-              cssClass = "bg-green-600/20 border-green-500 text-green-400 font-black";
-              innerContent = "✓";
-            } else if (status === 'wrong') {
-              cssClass = "bg-red-600/20 border-red-500 text-red-400 font-semibold";
-              innerContent = "✗";
-            }
-            
-            return (
-              <div key={index} title={`Questão ${index + 1}`} className={`h-8 rounded-lg border flex items-center justify-center font-mono text-xs transition-all ${cssClass} hover:scale-105 duration-100 select-none`}>
-                {innerContent}
+            <div className="flex flex-col text-left">
+              <span className="text-white font-extrabold text-base leading-tight tracking-wide">
+                {userName || "Ffdd"}
+              </span>
+              <div className="flex items-center gap-1 text-xs font-bold text-[#F8D308] mt-0.5">
+                <span className="text-sm">🪙</span>
+                <span>{accumulatedKz.toLocaleString()} Kz</span>
               </div>
+            </div>
+          </div>
+
+          {/* Question Badge Card */}
+          <div className="bg-[#240707]/90 border border-[#481212] px-5 py-2 rounded-2xl flex flex-col items-center shadow-lg">
+            <span className="text-[11px] font-bold text-rose-300/80 uppercase tracking-wide">
+              Pergunta
+            </span>
+            <div className="text-xl font-black leading-none mt-1">
+              <span className="text-white">{currentIndex + 1}</span>
+              <span className="text-zinc-500">/{questions.length}</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 2. PROGRESS BAR & PERCENTAGE */}
+        <div className="w-full space-y-1.5 pt-1">
+          <div className="w-full h-3 bg-[#1e0606] rounded-full overflow-hidden p-0.5 border border-[#3e1010]">
+            <div 
+              className="h-full bg-gradient-to-r from-[#F8D308] to-[#ffd736] rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(248,211,8,0.5)]"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="text-center text-xs font-black text-white tracking-wide">
+            {progressPercent}%
+          </div>
+        </div>
+
+        {/* 3. ACCUMULATED BALANCE & NEXT PRIZE CARD */}
+        <div className="w-full bg-[#1c0505]/95 border border-[#3e1010] rounded-3xl p-5 shadow-2xl backdrop-blur-sm flex justify-between items-center">
+          <div className="text-left">
+            <span className="text-[11px] font-extrabold uppercase text-zinc-400 tracking-wider block mb-1">
+              SALDO ACUMULADO
+            </span>
+            <div className="text-3xl font-black text-[#F8D308] tracking-tight leading-none">
+              {accumulatedKz.toLocaleString()} Kz
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-[11px] font-semibold text-zinc-300 block mb-1">
+              Próximo prêmio
+            </span>
+            <div className="text-xl font-black text-white tracking-tight leading-none">
+              +15 000 Kz
+            </div>
+          </div>
+        </div>
+
+        {/* 4. CIRCULAR COUNTDOWN TIMER */}
+        <div className="relative w-20 h-20 mx-auto flex items-center justify-center my-2">
+          <svg className="w-20 h-20 -rotate-90 transform" viewBox="0 0 80 80">
+            {/* Background ring */}
+            <circle
+              cx="40"
+              cy="40"
+              r={timerRadius}
+              className="stroke-[#2d0a0a]"
+              strokeWidth="5"
+              fill="transparent"
+            />
+            {/* Progress ring */}
+            <circle
+              cx="40"
+              cy="40"
+              r={timerRadius}
+              className="stroke-[#F8D308] transition-all duration-1000 ease-linear"
+              strokeWidth="5"
+              strokeDasharray={timerCircumference}
+              strokeDashoffset={timerStrokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-2xl font-black text-[#F8D308] drop-shadow-[0_0_8px_rgba(248,211,8,0.5)]">
+              {timer}
+            </span>
+          </div>
+        </div>
+
+        {/* 5. POWER-UPS / LIFELINES (50/50 & PULAR) */}
+        <div className="flex justify-center items-center gap-4 w-full my-2">
+          
+          {/* 50/50 Button */}
+          <button
+            type="button"
+            onClick={handleFiftyFifty}
+            disabled={fiftyFiftyUses <= 0 || selectedOption !== null || hiddenOptions.length > 0}
+            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1c0505] border border-[#3e1010] text-[#F8D308] font-black text-sm shadow-lg transition-all active:scale-95 duration-150 ${
+              fiftyFiftyUses > 0 && selectedOption === null && hiddenOptions.length === 0
+                ? 'hover:border-[#F8D308] hover:bg-[#280808] cursor-pointer'
+                : 'opacity-40 cursor-not-allowed'
+            }`}
+          >
+            <Scissors className="w-4 h-4 text-[#F8D308]" />
+            <span>50/50</span>
+            <span className="flex gap-1 ml-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${fiftyFiftyUses >= 1 ? 'bg-[#F8D308]' : 'bg-zinc-700'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${fiftyFiftyUses >= 2 ? 'bg-[#F8D308]' : 'bg-zinc-700'}`} />
+            </span>
+          </button>
+
+          {/* Pular Button */}
+          <button
+            type="button"
+            onClick={handleSkip}
+            disabled={skipUses <= 0 || selectedOption !== null}
+            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#1c0505] border border-[#3e1010] text-[#F8D308] font-black text-sm shadow-lg transition-all active:scale-95 duration-150 ${
+              skipUses > 0 && selectedOption === null
+                ? 'hover:border-[#F8D308] hover:bg-[#280808] cursor-pointer'
+                : 'opacity-40 cursor-not-allowed'
+            }`}
+          >
+            <FastForward className="w-4 h-4 text-[#F8D308]" />
+            <span>Pular</span>
+            <span className="flex gap-1 ml-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${skipUses >= 1 ? 'bg-[#F8D308]' : 'bg-zinc-700'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${skipUses >= 2 ? 'bg-[#F8D308]' : 'bg-zinc-700'}`} />
+            </span>
+          </button>
+
+        </div>
+
+        {/* 6. QUESTION CARD */}
+        <div className="w-full bg-[#1c0505]/95 border border-[#3e1010] rounded-3xl p-6 sm:p-8 shadow-2xl text-center min-h-[110px] flex items-center justify-center">
+          <h2 className="text-xl sm:text-2xl font-black text-white leading-relaxed tracking-tight">
+            {currentQ.question}
+          </h2>
+        </div>
+
+        {/* 7. OPTIONS (ANSWER CARDS) */}
+        <div className="w-full space-y-3 pt-1">
+          {currentQ.options.map((optionText, idx) => {
+            const isHidden = hiddenOptions.includes(idx);
+            const isSelected = selectedOption === idx;
+            const isCorrect = idx === currentQ.correctAnswer;
+            
+            let cardClasses = "bg-[#1c0505] border-[#3e1010] hover:border-[#F8D308]/70 hover:bg-[#280707]";
+            let badgeClasses = "bg-[#F8D308] text-black";
+
+            if (selectedOption !== null) {
+              if (isCorrect) {
+                cardClasses = "bg-emerald-950/80 border-emerald-500 text-emerald-200 ring-2 ring-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]";
+                badgeClasses = "bg-emerald-500 text-white";
+              } else if (isSelected) {
+                cardClasses = "bg-rose-950/80 border-rose-600 text-rose-200 ring-2 ring-rose-600/50 animate-shake";
+                badgeClasses = "bg-rose-600 text-white";
+              } else {
+                cardClasses = "bg-[#140303] border-[#250707] opacity-30";
+                badgeClasses = "bg-zinc-800 text-zinc-500";
+              }
+            }
+
+            if (isHidden) {
+              return (
+                <div
+                  key={idx}
+                  className="w-full bg-[#140303]/40 border border-[#200505] rounded-2xl p-3 sm:p-4 opacity-15 pointer-events-none transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="w-11 h-11 rounded-xl bg-zinc-900 text-zinc-700 font-black text-lg flex items-center justify-center shrink-0">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className="text-zinc-700 font-bold text-base sm:text-lg line-through">
+                      Opção eliminada (50/50)
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleAnswer(idx)}
+                disabled={selectedOption !== null}
+                className={`w-full border rounded-2xl p-3 sm:p-4 flex items-center gap-4 transition-all duration-200 text-left shadow-lg group active:scale-[0.98] ${cardClasses}`}
+              >
+                {/* Letter badge */}
+                <span className={`w-11 h-11 rounded-xl font-black text-lg flex items-center justify-center shrink-0 shadow-md transition-transform group-hover:scale-105 ${badgeClasses}`}>
+                  {String.fromCharCode(65 + idx)}
+                </span>
+                
+                {/* Option text */}
+                <span className="text-white font-bold text-base sm:text-lg flex-1 leading-snug">
+                  {optionText}
+                </span>
+
+                {selectedOption !== null && isCorrect && (
+                  <Check className="w-6 h-6 text-emerald-400 shrink-0 animate-bounce" />
+                )}
+                {selectedOption !== null && isSelected && !isCorrect && (
+                  <X className="w-6 h-6 text-rose-400 shrink-0" />
+                )}
+              </button>
             );
           })}
         </div>
+
+        {/* 8. QUIT BUTTON */}
+        <div className="pt-4 pb-6">
+          <button 
+            type="button"
+            onClick={onQuit} 
+            className="text-zinc-500 hover:text-rose-400 font-extrabold uppercase tracking-widest text-[11px] transition-colors py-2 w-full flex items-center justify-center gap-2"
+          >
+            <span>🏃</span> Voltar ao Menu Principal
+          </button>
+        </div>
+
       </div>
 
-      {/* Main Question Plate Glass Card */}
-      <div className="glass-card p-6 md:p-12 rounded-[3.5rem] border-zinc-800 shadow-2xl relative overflow-hidden space-y-8">
-        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none select-none">
-          <span className="text-[12rem]">🇦🇴</span>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-[9px] bg-zinc-900 hover:bg-zinc-800 transition-colors text-angola-yellow px-4 py-1.5 rounded-full font-black uppercase border border-zinc-800 tracking-wider">
-            {questions[currentIndex].category}
-          </span>
-          <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest">
-            VALOR: 15.000 Kz
-          </span>
-        </div>
-
-        <h2 className="text-xl md:text-3 text-3xl font-black text-zinc-100 leading-snug drop-shadow-sm italic text-left">
-          {questions[currentIndex].question}
-        </h2>
-        
-        {/* Interactive Live Audience Comment Bubble integrated directly on core plate */}
-        <div className="bg-zinc-950/85 border border-zinc-900 rounded-3xl p-4 md:p-5 flex gap-4 items-center text-xs text-left shadow-lg scale-100 hover:border-zinc-800 transition-all">
-          <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xl shrink-0 select-none shadow">
-            💬
-          </div>
-          <div>
-            <span className="text-zinc-500 font-extrabold uppercase text-[9px] block tracking-wider mb-0.5">Torcida Ao Vivo em Angola</span>
-            <span className="text-zinc-200 font-bold italic block text-sm select-all">"{currentComment}"</span>
-          </div>
-        </div>
-
-        {/* Options grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          {questions[currentIndex].options.map((opt, i) => (
-            <button key={i} onClick={() => handleAnswer(i)} disabled={selectedOption !== null}
-              className={`p-5 sm:p-6 rounded-3xl text-left border-4 transition-all duration-200 font-black text-sm sm:text-base flex items-center gap-4 ${
-                selectedOption === null 
-                  ? 'border-zinc-800 bg-zinc-900/60 hover:border-angola-yellow hover:scale-[1.01] hover:bg-zinc-900 shadow-lg' 
-                  : i === questions[currentIndex].correctAnswer 
-                    ? 'border-green-500 bg-green-500/20 text-green-400 scale-[1.03] z-10' 
-                    : i === selectedOption 
-                      ? 'border-angola-red bg-angola-red/20 text-angola-red animate-shake' 
-                      : 'border-zinc-900 opacity-20'}`}>
-              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 transition-colors ${
-                selectedOption === null ? 'bg-zinc-800 text-zinc-300' : i === questions[currentIndex].correctAnswer ? 'bg-green-500 text-black font-extrabold' : 'bg-zinc-900 text-zinc-700'
-              }`}>{String.fromCharCode(65 + i)}</span>
-              <span>{opt}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
+      {/* 9. FEEDBACK MODAL (Result of answer - matching reference design) */}
       {showFeedback && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/92 backdrop-blur-lg animate-fade-in">
-          <div className="glass-card w-full max-w-lg p-10 md:p-12 rounded-[4rem] border-zinc-700 text-center shadow-2xl animate-bounce-in relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-angola-red via-angola-yellow to-angola-red"></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in select-none">
+          
+          {/* Confetti / Sparkles floating in the background for correct answers */}
+          {selectedOption === currentQ.correctAnswer && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="absolute top-[15%] left-[20%] w-2.5 h-2.5 bg-yellow-400 rotate-45 rounded-sm opacity-80 animate-ping" />
+              <div className="absolute top-[25%] right-[22%] w-3 h-1.5 bg-emerald-400 -rotate-12 opacity-80" />
+              <div className="absolute top-[40%] left-[10%] w-2 h-3 bg-amber-400 rotate-12 opacity-75" />
+              <div className="absolute top-[35%] right-[12%] w-2 h-2 bg-yellow-300 rounded-full opacity-90" />
+              <div className="absolute bottom-[30%] left-[18%] w-3 h-2 bg-emerald-500 rotate-45 opacity-80" />
+              <div className="absolute bottom-[20%] right-[15%] w-2.5 h-2.5 bg-yellow-400 rotate-12 opacity-75" />
+              <div className="absolute top-[18%] right-[35%] w-2 h-2 bg-yellow-500 rounded-sm opacity-70" />
+              <div className="absolute bottom-[35%] right-[30%] w-2 h-3 bg-emerald-400 -rotate-45 opacity-80" />
+            </div>
+          )}
+
+          {/* Modal Container */}
+          <div className="w-full max-w-[360px] sm:max-w-sm rounded-[2rem] bg-[#0c0404] border border-[#2a0c0c] p-6 sm:p-8 text-center shadow-[0_15px_40px_rgba(0,0,0,0.9)] relative overflow-hidden animate-zoom-in">
             
-            <div className="mb-6">
-              {selectedOption === questions[currentIndex].correctAnswer ? (
-                <div className="space-y-2">
-                  <div className="text-7xl mb-4">🏆</div>
-                  <h3 className="text-green-500 text-4xl sm:text-5xl font-black italic uppercase tracking-tighter">CORRECTO!</h3>
-                  <p className="text-white font-black text-xl sm:text-2xl mt-1">+15.000 Kz Adicionados ao Balanço</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-7xl mb-4">❌</div>
-                  <h3 className="text-angola-red text-4xl sm:text-5xl font-black italic uppercase tracking-tighter">ERRADO!</h3>
-                  <p className="text-zinc-400 font-bold">A resposta certa era:<br/>
-                    <span className="text-white text-lg sm:text-xl uppercase mt-2 block border-b border-zinc-900 pb-2">{questions[currentIndex].options[questions[currentIndex].correctAnswer]}</span>
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 p-5 bg-zinc-950 border border-zinc-900 rounded-3xl text-left border-l-4 border-l-angola-yellow shadow-inner">
-              <p className="text-[10px] font-black text-angola-yellow uppercase mb-2 tracking-widest flex items-center gap-2">
-                <span>💡</span> SABIAS QUE?
-              </p>
-              <p className="text-zinc-100 leading-relaxed italic text-xs sm:text-sm font-semibold">"{questions[currentIndex].curiosity}"</p>
-            </div>
-
-            <button onClick={next} className="mt-8 w-full py-5 btn-ganho text-black font-black rounded-3xl uppercase tracking-widest text-lg hover:scale-[1.03] transition-transform shadow-lg animate-pulse">
-              CONTINUAR GANHANDO
+            {/* Subtle Close 'X' Button on top right */}
+            <button
+              type="button"
+              onClick={next}
+              className="absolute top-5 right-5 text-zinc-600 hover:text-zinc-300 transition-colors p-1"
+              aria-label="Fechar"
+            >
+              <X className="w-5 h-5" />
             </button>
+
+            {selectedOption === currentQ.correctAnswer ? (
+              /* VICTORY VIEW - Exact clone of the reference image */
+              <div className="flex flex-col items-center">
+                
+                {/* Money Bag Icon with glowing background */}
+                <div className="relative mb-3 mt-1 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[#F8D308]/10 blur-xl absolute inset-0 m-auto" />
+                  <span className="text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(248,211,8,0.4)]">
+                    💰
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-[#F8D308] text-2xl sm:text-3xl font-black tracking-tight mb-1">
+                  Parabéns!
+                </h3>
+
+                {/* Subtitle */}
+                <p className="text-zinc-400 text-sm font-medium mb-3">
+                  Você ganhou
+                </p>
+
+                {/* Reward Amount */}
+                <div className="text-[#F8D308] text-3xl sm:text-4xl font-black tracking-tight mb-2">
+                  15 000 KZS
+                </div>
+
+                {/* Sub-label */}
+                <p className="text-zinc-500 text-xs sm:text-sm font-medium mb-6">
+                  Adicionado ao seu saldo
+                </p>
+
+                {/* Curiosity Note (compact & elegant) */}
+                {currentQ.curiosity && (
+                  <div className="w-full mb-6 p-3 bg-[#150505] border border-[#2e0b0b] rounded-xl text-left">
+                    <p className="text-[10px] font-bold text-[#F8D308] uppercase mb-0.5 tracking-wider flex items-center gap-1">
+                      <Lightbulb className="w-3 h-3 text-[#F8D308]" /> Sabias que?
+                    </p>
+                    <p className="text-zinc-300 italic text-[11px] leading-snug">
+                      "{currentQ.curiosity}"
+                    </p>
+                  </div>
+                )}
+
+                {/* Continuar Action Button */}
+                <button
+                  type="button"
+                  onClick={next}
+                  className="w-full py-4 px-6 bg-[#FFA800] hover:bg-[#FFB726] active:scale-95 text-black font-black text-base sm:text-lg rounded-2xl sm:rounded-full tracking-wide shadow-[0_4px_20px_rgba(255,168,0,0.35)] transition-all cursor-pointer"
+                >
+                  Continuar
+                </button>
+
+              </div>
+            ) : (
+              /* INCORRECT ANSWER VIEW */
+              <div className="flex flex-col items-center">
+                
+                <div className="mb-3 mt-1 text-5xl">
+                  ❌
+                </div>
+
+                <h3 className="text-rose-500 text-2xl sm:text-3xl font-black tracking-tight mb-2">
+                  Não foi desta vez!
+                </h3>
+
+                <p className="text-zinc-400 text-xs sm:text-sm mb-1">
+                  A resposta correta era:
+                </p>
+
+                <div className="text-white text-base sm:text-lg font-bold bg-[#1a0505] border border-[#3e0f0f] rounded-xl px-4 py-2 w-full my-2 text-center text-[#F8D308]">
+                  {currentQ.options[currentQ.correctAnswer]}
+                </div>
+
+                {currentQ.curiosity && (
+                  <div className="w-full my-3 p-3 bg-[#150505] border border-[#2e0b0b] rounded-xl text-left">
+                    <p className="text-[10px] font-bold text-[#F8D308] uppercase mb-0.5 tracking-wider flex items-center gap-1">
+                      <Lightbulb className="w-3 h-3 text-[#F8D308]" /> Sabias que?
+                    </p>
+                    <p className="text-zinc-300 italic text-[11px] leading-snug">
+                      "{currentQ.curiosity}"
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={next}
+                  className="w-full mt-4 py-3.5 px-6 bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-white font-bold text-base rounded-2xl transition-all cursor-pointer"
+                >
+                  Continuar
+                </button>
+
+              </div>
+            )}
+
           </div>
         </div>
       )}
 
-      <button onClick={onQuit} className="text-zinc-700 hover:text-angola-red font-black uppercase tracking-widest text-[9px] py-4 w-full transition-colors flex items-center justify-center gap-2">
-        <span>🏃</span> Desistir e salvar prémio atual
-      </button>
     </div>
   );
 };

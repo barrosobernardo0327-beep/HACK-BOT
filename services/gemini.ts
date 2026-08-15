@@ -23,6 +23,13 @@ export const getAI = (): GoogleGenAI => {
 
 const FALLBACK_QUESTIONS: QuizQuestion[] = [
   {
+    question: "Quem fundou a cidade de Luanda?",
+    options: ["António Agostinho Neto", "Paulo Jose Dias de Novais", "Diogo Cão", "Afonso I do Congo"],
+    correctAnswer: 1,
+    curiosity: "A cidade de São Paulo da Assunção de Loanda foi fundada a 25 de Janeiro de 1576 pelo fidalgo e explorador Paulo Dias de Novais.",
+    category: "História de Angola"
+  },
+  {
     question: "Qual é a capital da República de Angola?",
     options: ["Benguela", "Huambo", "Luanda", "Lubango"],
     correctAnswer: 2,

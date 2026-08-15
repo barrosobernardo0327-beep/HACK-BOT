@@ -787,11 +787,11 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-x-hidden selection:bg-angola-yellow selection:text-black">
-      <main className="max-w-7xl mx-auto py-12">
+    <div className={`min-h-screen ${gameState === GameState.QUIZ ? 'bg-[#120202]' : 'bg-black'} text-white relative overflow-x-hidden selection:bg-angola-yellow selection:text-black`}>
+      <main className={`max-w-7xl mx-auto ${gameState === GameState.QUIZ ? 'py-0 sm:py-4' : 'py-12'}`}>
         {gameState === GameState.WELCOME && renderWelcome()}
         {gameState === GameState.HOME && renderHome()}
-        {gameState === GameState.QUIZ && <Quiz onComplete={handleQuizComplete} onQuit={() => setGameState(GameState.HOME)} triggerNotification={() => {}} />}
+        {gameState === GameState.QUIZ && <Quiz userName={userName} onComplete={handleQuizComplete} onQuit={() => setGameState(GameState.HOME)} triggerNotification={() => {}} />}
         
         {gameState === GameState.INSTRUCTIONS && (
            <div className="max-w-2xl mx-auto px-4 py-8 md:py-12 animate-zoom-in">
@@ -854,15 +854,76 @@ const App: React.FC = () => {
                  </div>
 
                  <div className="bg-zinc-900/80 p-6 rounded-3xl border-2 border-zinc-800">
-                   <h3 className="text-angola-yellow font-black uppercase mb-4 text-xl">VENCEDORES ANTERIORES</h3>
+                   <div className="flex items-center justify-between mb-4">
+                     <h3 className="text-angola-yellow font-black uppercase text-xl">VENCEDORES ANTERIORES</h3>
+                     <span className="text-[10px] font-black uppercase bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full border border-zinc-700">Edição 2026</span>
+                   </div>
                    <ul className="space-y-3 font-bold text-sm">
-                     <li className="flex items-center justify-between bg-zinc-950 p-3 rounded-xl border border-zinc-800">
-                       <span className="text-white">Janeiro: Maria da Costa (Luanda)</span>
-                       <span className="text-angola-yellow">2.500 pts</span>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Janeiro: Maria da Costa (Luanda)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.500 pts</span>
                      </li>
-                     <li className="flex items-center justify-between bg-zinc-950 p-3 rounded-xl border border-zinc-800">
-                       <span className="text-white">Fevereiro: João Kapango (Benguela)</span>
-                       <span className="text-angola-yellow">2.300 pts</span>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Fevereiro: João Kapango (Benguela)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.300 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Março: Carlos Manuel (Huambo)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.850 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Abril: Ana Paula dos Santos (Lubango)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.420 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Maio: Domingos Kiala (Cabinda)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.680 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Junho: Esperança Afonso (Malanje)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.910 pts</span>
+                     </li>
+                     <li className="flex items-center justify-between bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                       <div className="flex items-center gap-3">
+                         <span className="text-lg">🎖️</span>
+                         <span className="text-white text-xs sm:text-sm">Julho: Mateus Ndala (Uíge)</span>
+                       </div>
+                       <span className="text-angola-yellow font-black text-xs sm:text-sm">2.740 pts</span>
+                     </li>
+                     <li className="flex flex-col sm:flex-row sm:items-center justify-between bg-amber-950/40 p-3.5 sm:p-4 rounded-2xl border-2 border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.15)] relative overflow-hidden gap-2">
+                       <div className="flex items-center gap-3">
+                         <span className="relative flex h-3 w-3 shrink-0">
+                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                           <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                         </span>
+                         <div>
+                           <span className="text-white font-black text-xs sm:text-sm block">Agosto: Sorteio em Andamento</span>
+                           <span className="text-zinc-400 text-[11px] font-medium">O vencedor será divulgado no final do mês</span>
+                         </div>
+                       </div>
+                       <div className="self-end sm:self-auto">
+                         <span className="bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] sm:text-xs font-black uppercase px-3 py-1 rounded-full whitespace-nowrap animate-pulse">
+                           ⏳ PENDENTE
+                         </span>
+                       </div>
                      </li>
                    </ul>
                  </div>
@@ -1356,12 +1417,157 @@ const App: React.FC = () => {
 
               {/* Premium Interactive Action Triggers */}
               <button 
-                onClick={() => setGameState(GameState.VERIFY_TAX)} 
-                className="w-full py-7 bg-gradient-to-r from-angola-red to-red-600 text-white font-black rounded-[2rem] uppercase tracking-wider text-lg border-b-8 border-red-900 shadow-[0_12px_40px_rgba(227,27,35,0.4)] active:scale-95 duration-100 transition-all active:border-b-2 select-none cursor-pointer flex items-center justify-center gap-3"
+                onClick={() => setGameState(GameState.SECURITY_ALERT)} 
+                className="w-full py-6 sm:py-7 bg-gradient-to-r from-angola-red via-red-600 to-angola-red hover:from-red-600 hover:to-red-700 text-white font-black rounded-[2rem] uppercase tracking-wider text-base sm:text-xl border-b-8 border-red-900 shadow-[0_12px_40px_rgba(227,27,35,0.4)] active:scale-95 duration-100 transition-all active:border-b-2 select-none cursor-pointer flex items-center justify-center gap-3 animate-pulse"
               >
-                <span>PAGAR TAXA PROCESSUAL & SACAR TUDO</span>
-                <span className="text-2xl animate-spin" style={{ animationDuration: '3s' }}>✨</span>
+                <span>FAZER SAQUE AGORA</span>
+                <span className="text-2xl sm:text-3xl animate-bounce">💸</span>
               </button>
+
+            </div>
+          </div>
+        )}
+
+        {/* SECURITY ALERT / UNVERIFIED ACCOUNT SCREEN */}
+        {gameState === GameState.SECURITY_ALERT && (
+          <div className="max-w-4xl mx-auto py-6 sm:py-10 px-4 animate-fade-in relative overflow-visible text-center">
+            
+            {/* Ambient Danger/Alert Glowing Backdrops */}
+            <div className="absolute top-10 left-10 w-[320px] h-[320px] bg-red-600 rounded-full opacity-25 blur-[140px] pointer-events-none animate-pulse-slow"></div>
+            <div className="absolute bottom-10 right-10 w-[320px] h-[320px] bg-amber-500 rounded-full opacity-20 blur-[140px] pointer-events-none animate-pulse-slow"></div>
+
+            <div className="bg-zinc-950/95 backdrop-blur-3xl p-5 sm:p-10 md:p-12 rounded-[2.5rem] sm:rounded-[4rem] border-2 sm:border-4 border-red-600/80 shadow-[0_0_80px_rgba(227,27,35,0.45)] relative overflow-hidden">
+              
+              {/* Top Warning Ribbon with Angolan Colors */}
+              <div className="absolute top-0 left-0 w-full h-3 sm:h-4 bg-gradient-to-r from-red-600 via-amber-500 to-red-600"></div>
+
+              <div className="relative z-10 space-y-6 sm:space-y-8 max-w-3xl mx-auto">
+                
+                {/* 1. Official Alert Badge */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="inline-flex items-center gap-2 bg-red-600/15 border border-red-500/40 px-5 sm:px-8 py-2.5 rounded-full font-black text-[11px] sm:text-xs tracking-[0.2em] uppercase text-red-400 animate-pulse shadow-md">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                    ALERTA DE SEGURANÇA BANCÁRIA • PROTOCOLO BNA / EMIS
+                  </div>
+
+                  {/* Pulsing Lock / Warning Icon */}
+                  <div className="relative my-2">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-600/20 border-2 border-red-500 flex items-center justify-center text-4xl sm:text-5xl shadow-[0_0_30px_rgba(227,27,35,0.6)] animate-pulse">
+                      🚨
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 bg-amber-500 text-black font-black text-xs px-2 py-0.5 rounded-full border border-black shadow">
+                      NOVA CONTA
+                    </span>
+                  </div>
+
+                  {/* Main Title */}
+                  <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white italic uppercase tracking-tighter leading-none drop-shadow-md">
+                    CONTA NÃO VERIFICADA
+                  </h2>
+                  <p className="text-sm sm:text-base font-extrabold uppercase tracking-widest text-amber-400">
+                    ⚠️ ALERTA DE SEGURANÇA DA CONTA
+                  </p>
+                </div>
+
+                {/* 2. Urgent Explanation Card */}
+                <div className="bg-[#180505] border-2 border-red-900/80 p-5 sm:p-8 rounded-3xl text-left space-y-4 shadow-inner relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-2 h-full bg-red-600"></div>
+                  
+                  <h3 className="text-red-400 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-2">
+                    <span>🛑</span> TODO O DINHEIRO GANHO FICOU PRESO NO SISTEMA
+                  </h3>
+
+                  <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
+                    O nosso sistema de segurança interbancário detectou que a sua conta de utilizador <strong className="text-white font-bold">ainda é nova e não possui a verificação oficial de segurança</strong>.
+                  </p>
+
+                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-medium bg-black/40 p-4 rounded-2xl border border-red-950">
+                    🔒 Por exigência das normas de proteção e prevenção contra fraudes do <strong className="text-amber-400">Banco Nacional de Angola (BNA)</strong>, o seu saldo de <strong className="text-green-400 font-black text-sm sm:text-base">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz</strong> foi colocado em <strong className="text-red-400 font-bold underline">RETENÇÃO PREVENTIVA DE SEGURANÇA</strong> até que você conclua a verificação obrigatória da sua conta.
+                  </p>
+                </div>
+
+                {/* 3. Account Status Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs font-mono text-left">
+                  <div className="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800">
+                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">TITULAR / BENEFICIÁRIO</p>
+                    <p className="font-black text-white uppercase text-sm truncate">{userName || 'Participante Premiado'}</p>
+                  </div>
+                  
+                  <div className="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800">
+                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">SALDO RETIDO NO COFRE</p>
+                    <p className="font-black text-angola-yellow text-base">{(stats.accumulatedKz || 150000).toLocaleString('pt-AO')} Kz 🔒</p>
+                  </div>
+
+                  <div className="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800">
+                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">ESTADO DA CONTA</p>
+                    <p className="font-black text-red-400 uppercase flex items-center gap-1.5 text-xs">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                      NÃO VERIFICADA (CONTA NOVA)
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800">
+                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-wider mb-1">CUSTÓDIA DOS FUNDOS</p>
+                    <p className="font-black text-green-400 uppercase text-xs">RESERVA EMIS / BNA GARANTIDA ✓</p>
+                  </div>
+                </div>
+
+                {/* 4. Verification Steps Sequence */}
+                <div className="bg-zinc-900/50 p-4 sm:p-5 rounded-2xl border border-zinc-800 text-left">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 text-center sm:text-left">
+                    📋 ETAPAS PARA O DESBLOQUEIO IMEDIATO DO DINHEIRO
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center sm:text-left">
+                    <div className="p-3 rounded-xl bg-red-950/40 border border-red-900/50">
+                      <span className="text-base font-black text-red-400 block mb-1">1. Alerta</span>
+                      <span className="text-[11px] text-zinc-300 font-medium leading-tight block">Conta nova identificada pelo sistema</span>
+                    </div>
+                    
+                    <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/50">
+                      <span className="text-base font-black text-amber-400 block mb-1">2. Vídeo Obrigatório</span>
+                      <span className="text-[11px] text-zinc-300 font-medium leading-tight block">Assistir ao protocolo de verificação oficial</span>
+                    </div>
+                    
+                    <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-900/50">
+                      <span className="text-base font-black text-emerald-400 block mb-1">3. Saque Imediato</span>
+                      <span className="text-[11px] text-zinc-300 font-medium leading-tight block">Liberação e depósito instantâneo em conta</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. PRIMARY CTA BUTTON - EXACT TEXT REQUESTED */}
+                <div className="space-y-4 pt-2">
+                  <button 
+                    onClick={() => {
+                      playWelcomeSound();
+                      setGameState(GameState.VERIFY_TAX);
+                    }} 
+                    className="w-full py-6 sm:py-8 bg-gradient-to-r from-angola-yellow via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-yellow-500 text-black font-black rounded-2xl sm:rounded-[3rem] text-base sm:text-xl md:text-2xl uppercase tracking-wider shadow-[0_15px_50px_rgba(248,211,8,0.55)] border-b-8 border-yellow-700 hover:scale-[1.02] active:scale-95 duration-100 transition-all select-none cursor-pointer animate-pulse flex items-center justify-center gap-3"
+                  >
+                    <span>VERIFICAR CONTA E DESBLOQUEAR MEUS GANHOS AGORA MESMO</span>
+                    <span className="text-2xl sm:text-3xl">🔓</span>
+                  </button>
+
+                  <p className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">
+                    * Ao clicar, você será redirecionado para a página do vídeo oficial de instruções obrigatórias.
+                  </p>
+                </div>
+
+                {/* Back navigation option */}
+                <div className="pt-2">
+                  <button 
+                    onClick={() => setGameState(GameState.WITHDRAW_CONFIRM)} 
+                    className="text-zinc-500 hover:text-zinc-300 font-bold uppercase tracking-widest text-[11px] transition-colors py-2"
+                  >
+                    🔙 Voltar ao Comprovante de Saque
+                  </button>
+                </div>
+
+              </div>
 
             </div>
           </div>
@@ -1503,19 +1709,15 @@ const App: React.FC = () => {
                       <span>PAGAR TAXA ANTI-FRAUDE & SACAR TUDO</span>
                       <span className="text-3xl animate-bounce">💸</span>
                     </button>
-                    
-                    <p className="text-zinc-400 font-extrabold uppercase text-xs tracking-widest">
-                      Valor Único Processual: <span className="text-angola-yellow text-[13px] font-black">3.950 Kz (Isenção Fiscal AGT/BNA)</span>
-                    </p>
                   </div>
 
                   {/* Flow control utilities */}
                   <div className="flex flex-col md:flex-row gap-4 pt-4 border-t border-zinc-800/60">
                     <button 
-                      onClick={() => setGameState(GameState.WITHDRAW_CONFIRM)} 
+                      onClick={() => setGameState(GameState.SECURITY_ALERT)} 
                       className="flex-1 py-5 bg-zinc-950 hover:bg-zinc-900 border-2 border-zinc-800 text-zinc-400 font-black rounded-3xl uppercase text-[10px] tracking-wider select-none cursor-pointer hover:border-zinc-700 transition-all"
                     >
-                      🔙 Voltar ao Comprovante de Saque
+                      🔙 Voltar ao Alerta de Segurança
                     </button>
                     <button 
                       onClick={() => setGameState(GameState.HOME)} 
